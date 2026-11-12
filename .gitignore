@@ -1,0 +1,39 @@
+# ===========================================================================
+#  FUP - Formato Unico de Personal
+#  Que NO entra al repositorio, y por que.
+# ===========================================================================
+
+# --- Credenciales -----------------------------------------------------------
+# La plantilla versionada es Conexion/config.ejemplo.php
+/Conexion/config.php
+# Codigo muerto con una 4a credencial (base 'pmp'); nadie lo referencia.
+# Apache probablemente lo sirve como TEXTO PLANO: borrarlo del servidor.
+/Conexion/net.phtml
+
+# --- Datos generados por el sistema (no son codigo fuente; pesan >10 GB) ----
+/FUPs/
+/doc_exportados/
+/Conexion/subidas/
+/pantallas/PDF/
+/pantallas/ori/
+/pantallas/*.txt
+# 5,555 codigos de barras generados, uno por folio
+/Codigo_Barras/*.png
+
+# --- Codigo muerto -----------------------------------------------------------
+# Copias de respaldo hechas a mano antes de existir git. Se verifico que
+# ningun archivo vivo las referencia. Siguen en disco, solo no se versionan.
+/Errores/
+/pantallas_cambio/
+/Js_cambio/
+
+# --- Respaldos manuales -------------------------------------------------------
+# Apache los sirve como texto plano: exponen el codigo fuente a cualquiera.
+*.bak
+*.bak_*
+
+# --- Temporales ---------------------------------------------------------------
+/_to_delete/
+Thumbs.db
+desktop.ini
+/nbproject/private/

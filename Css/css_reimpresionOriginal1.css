@@ -1,0 +1,174 @@
+/*@media (min-width:768px){*/
+.typeahead{ border:2px solid #FFF;border-radius:40px;max-width:100px;min-width:320px;background:rgba(255, 165, 0, 0.5);color:#FFF; text-align:center;}
+ul.typeahead{margin:10px;margin-bottom:90px;  margin-right:150px;  margin-left:0px;padding:0px 0px;}
+ul.typeahead.dropdown-menu li a{padding:1px !important;  border-bottom:#CCC 1px solid;color:#000000;}
+ul.typeahead.dropdown-menu li:last-child a{ border-bottom:0px !important;}
+.dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover{text-decoration:none; background-color:#558dd5; outline:0; ;border-radius:60px;}	
+
+.content{width:auto; height:auto; line-height:auto; margin:0px auto; text-align:center; background-repeat:no-repeat; top:0px; left:800px;}
+
+.form-control:focus{ border-color:#065219; box-shadow:none; -webkit-box-shadow:none;} 
+
+.form-check .invalid-feedback {
+    margin-left: -20px;
+}
+
+label,#label,#labelR{font-size:.9em;}
+
+
+*{font-family:Voltaire; box-sizing:border-box; margin:0; padding:0;}
+
+html,head{/*background:linear-gradient(90deg,#558dd5, #558dd5);*/}
+
+
+
+@media (max-width: 640px) {
+
+}	
+body{
+	height:10%;
+	width:30%; 
+	background:linear-gradient(45deg,#DCE2E7, #DCE2E7);
+	/*border-radius:1200px;*/ /*border:1px solid #065219;*/ /*background:url("../Logo/m/10");*/
+}
+input[type=text]{height:35px; width:310px; border:1px solid #065219; border-radius:20px 20px; position:center; outline:none; margin:10px auto; padding:10px;}
+
+input[type=text]::placeholder{color:#000000; opacity:0.7; font-size:.9em; position:center;}
+
+#pendientes{
+        width: 50%;
+        position: absolute;
+        top: 0px;
+        left: 300px;
+        color: black;   
+        font-size: 30px;        
+}
+#buscarR_{position:absolute; top:50px;  left: 450px;}
+
+#descripcionR{height:35px; width:310px; border:1px solid #065219; border-radius:20px 20px; position:absolute; top:75px; left: 350px;  outline:none; margin:10px auto; padding:0px;}
+
+#num_doctoR{position:absolute; top:115px; left: 350px;}
+
+#rfcR{text-transform:uppercase;position:absolute; top:115px; left: 350px;}
+
+/*#formulario3{background-color:red; padding:8px; margin:0 auto; text-align:center;
+width:450px; height:100px; position:absolute; top:20px; right:-10px;}*/
+
+#labelsR{font-size:.9em; position:absolute; top:340px; left:450px; /* width:100px;*/}
+#rfc_num_doctosR{position:absolute; top:360px; left:350px;}
+#rfc_num_doctoR{height:35px; width:310px; border:1px solid #065219; border-radius:20px 20px; position:center; outline:none; margin:10px auto; padding:0px;}
+
+
+#nomEmpsR{position:absolute; top:160px; right:470px;}
+
+#bttR2_{position:absolute; top:400px; left: 450px; outline:none;}
+
+#btnGetDataR{margin:25px auto; padding:5px; border-radius:20px 20px; outline:none;}
+.btnGetDataR{
+	transition-duration: 0.4s;
+	border:1px solid #343A40;
+	/*background-color: #078125;*/
+	color:#343A40;
+}
+.btnGetDataR:hover {
+  background-color: #343A40;
+  color: white;
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+/* Responsive centered layout for Reimpresion Original */
+html,
+body {
+	width: 100%;
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+	background: #DCE2E7;
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	padding: 24px 12px;
+}
+
+#formulario3 {
+	width: min(100%, 620px);
+	margin: 0 auto;
+	padding: 24px;
+	background: #fff;
+	border: 1.5px solid #065219;
+	text-align: center;
+}
+
+#pendientes {
+	position: static;
+	display: block;
+	width: 100%;
+	margin: 0 0 20px;
+	color: #111;
+	font-size: 24px;
+	font-weight: 700;
+	text-align: center;
+}
+
+#formulario3 .modal-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 0;
+	border-top: 0;
+}
+
+#buscarR_,
+#descripcionR,
+#num_doctoR,
+#rfcR,
+#labelsR,
+#rfc_num_doctosR,
+#nomEmpsR,
+#bttR2_ {
+	position: static;
+	top: auto;
+	left: auto;
+	right: auto;
+	width: 100%;
+	max-width: 360px;
+	margin: 0 auto;
+}
+
+#descripcionR,
+#num_doctoR,
+#rfcR,
+#rfc_num_doctoR {
+	width: 100%;
+	max-width: 360px;
+	height: 38px;
+}
+
+#rfcR {
+	text-transform: uppercase;
+}
+
+#btnGetDataR {
+	margin: 8px auto 0;
+	padding: 8px 18px;
+}
+
+@media (max-width: 640px) {
+	body {
+		padding: 12px 8px;
+	}
+
+	#formulario3 {
+		padding: 18px 12px;
+	}
+
+	#pendientes {
+		font-size: 20px;
+	}
+}

@@ -1,0 +1,39 @@
+<?php
+if(isset($_POST['rfc_num_docto'])){
+
+	require_once('../../lib/nusoap.php'); 
+	require_once('../ServicioWeb.php');
+
+	$html="";
+	$rfc = $_POST['rfc_num_docto'];
+
+	$id_consultaRS2_r_nd = 78;
+    $JSONRS2_r_nd="[{\"datos\":\"$rfc\"}]";
+    $arrayRS2_r_nd = json_decode(json_encode($JSONRS2_r_nd), True);
+    $paramsRS2_r_nd = array('Resultado'=>$id_consultaRS2_r_nd, 'Argumento'=>$arrayRS2_r_nd, 'Accion'=>"select"); //para conseguir la consulta
+    $resultadosRS2_r_nd=$cliente->getConsulta($params);
+    $arrayR3= json_decode(json_encode($resultadosRS2_r_nd), True);
+//var_dump($arrayR3);
+	$xml = simplexml_load_string($arrayR3['getConsultaResult']['any'], "SimpleXMLElement", LIBXML_NOCDATA);
+	$json = json_encode($xml);
+	$array = json_decode($json,TRUE);
+	//var_dump($array);
+
+	if(!empty($array)){
+	
+		$ver = $array['NewDataSet']['table'];
+		$total_res= count($ver);
+	    
+		$x = 0;
+		 while ($x < $total_res){	
+			$html .= '
+			<option value="'.$ver[$x]['num_docto'].'">'.$ver[$x]['num_docto'].'</option>';
+			$x++;
+		}
+		
+	}else{
+		$html .= '<option value="No hay Numeros de Documento">No hay Numeros de Documento</option>';
+	} 
+	echo $html;
+}
+?>

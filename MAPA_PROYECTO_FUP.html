@@ -1,0 +1,992 @@
+<title>Mapa del sistema FUP</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: expediente tecnico — seis figuras de carriles + fichas de referencia completas */
+  :root{
+    --paper:#f2f4f7; --panel:#ffffff; --panel-2:#e9edf2;
+    --ink:#1b2230; --ink-soft:#5a6574; --rule:#c8d0da;
+    --accent:#1b5c70; --accent-soft:#dceaee;
+    --mod:#8a5509; --mod-soft:#f7ecd9;
+    --warn:#8d2f2f; --warn-soft:#f7e2e2;
+    --font-display:"Bitter",Georgia,"Times New Roman",serif;
+    --font-body:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#111620; --panel:#1a202a; --panel-2:#232b37;
+      --ink:#e4e8ef; --ink-soft:#98a4b4; --rule:#36404e;
+      --accent:#69b6cb; --accent-soft:#17323b;
+      --mod:#dfab4e; --mod-soft:#2c2415;
+      --warn:#e08a8a; --warn-soft:#2f1c1c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111620; --panel:#1a202a; --panel-2:#232b37;
+    --ink:#e4e8ef; --ink-soft:#98a4b4; --rule:#36404e;
+    --accent:#69b6cb; --accent-soft:#17323b;
+    --mod:#dfab4e; --mod-soft:#2c2415;
+    --warn:#e08a8a; --warn-soft:#2f1c1c;
+    color-scheme: dark;
+  }
+
+  body{background:var(--paper); color:var(--ink); font-family:var(--font-body); line-height:1.55;}
+  .wrap{max-width:1180px; margin:0 auto; padding-inline:18px; padding-block:40px 72px;}
+
+  header.top{border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:28px;}
+  .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 8px;}
+  h1{font-family:var(--font-display); font-weight:700; font-size:clamp(26px,4.4vw,40px); line-height:1.1; margin:0 0 10px; text-wrap:balance;}
+  .lede{margin:0; max-width:64ch; color:var(--ink-soft); font-size:15px;}
+
+  nav.toc{border:1px solid var(--rule); border-radius:6px; background:var(--panel); padding:14px 18px; margin-bottom:12px;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:28px; font-size:13.5px;}
+  nav.toc li{margin-bottom:4px; break-inside:avoid;}
+  nav.toc a{color:var(--ink);}
+
+  h2{font-family:var(--font-display); font-weight:700; font-size:21px; margin:52px 0 6px; text-wrap:balance;}
+  h3{font-family:var(--font-display); font-weight:500; font-size:16px; margin:30px 0 6px;}
+  .sub{margin:0 0 18px; color:var(--ink-soft); font-size:14px; max-width:74ch;}
+  p{max-width:74ch;}
+
+  code, .path{font-family:var(--font-mono); font-size:.88em;}
+  .path{background:var(--panel-2); border-radius:3px; padding:1px 5px;}
+
+  figure{margin:0 0 8px;}
+  .scroller{overflow-x:auto; border:1px solid var(--rule); border-radius:6px; background:var(--panel); padding:14px;}
+  .scroller svg{display:block; min-width:880px; max-width:100%; height:auto; color:var(--ink);}
+  figcaption{font-size:13px; color:var(--ink-soft); margin-top:10px; max-width:80ch;}
+
+  .lane{fill:var(--panel-2); stroke:none;}
+  .lane-label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.11em; fill:var(--ink-soft); text-transform:uppercase;}
+  .nb{fill:var(--panel); stroke:var(--rule); stroke-width:1.2;}
+  .nb-mod{fill:var(--mod-soft); stroke:var(--mod); stroke-width:1.6;}
+  .nb-ext{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.2;}
+  .nb-warn{fill:var(--warn-soft); stroke:var(--warn); stroke-width:1.4;}
+  .nb-bus{fill:var(--panel); stroke:var(--rule); stroke-width:1.2; stroke-dasharray:5 4;}
+  .t{font-family:var(--font-mono); font-size:11px; fill:var(--ink);}
+  .t-sm{font-family:var(--font-mono); font-size:10px; fill:var(--ink);}
+  .t-b{font-family:var(--font-body); font-size:11.5px; font-weight:600; fill:var(--ink);}
+  .t-s{font-family:var(--font-body); font-size:10.5px; fill:var(--ink-soft);}
+  .t-mod{font-family:var(--font-body); font-size:10px; font-weight:600; fill:var(--mod); letter-spacing:.06em;}
+  .t-warn{font-family:var(--font-body); font-size:10px; font-weight:600; fill:var(--warn); letter-spacing:.06em;}
+  .edge{stroke:var(--ink); stroke-width:1.4; fill:none;}
+  .edge-d{stroke:var(--ink-soft); stroke-width:1.2; fill:none; stroke-dasharray:4 4;}
+  .edge-mod{stroke:var(--mod); stroke-width:2; fill:none;}
+  .edge-warn{stroke:var(--warn); stroke-width:1.6; fill:none; stroke-dasharray:6 3;}
+  .el{font-family:var(--font-mono); font-size:10px; fill:var(--ink-soft);}
+  .el-mod{font-family:var(--font-mono); font-size:10px; fill:var(--mod); font-weight:500;}
+
+  table{border-collapse:collapse; width:100%; font-size:13.5px;}
+  .tscroll{overflow-x:auto;}
+  .tscroll table{min-width:640px;}
+  th,td{text-align:left; vertical-align:top; padding:8px 12px 8px 0; border-bottom:1px solid var(--rule);}
+  th{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); font-weight:500; white-space:nowrap;}
+  td.num{font-variant-numeric:tabular-nums; font-family:var(--font-mono); font-size:12.5px;}
+  td.nw{white-space:nowrap;}
+
+  .mod-tag{display:inline-block; font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; color:var(--mod); border:1px solid var(--mod); border-radius:3px; padding:0 4px; margin-left:6px; vertical-align:1px;}
+  .warn-tag{display:inline-block; font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; color:var(--warn); border:1px solid var(--warn); border-radius:3px; padding:0 4px; margin-left:6px; vertical-align:1px;}
+
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px; margin-top:18px;}
+  .card{border:1px solid var(--rule); border-left:3px solid var(--mod); border-radius:5px; background:var(--panel); padding:14px 16px; min-width:0;}
+  .card.w{border-left-color:var(--warn);}
+  .card h4{font-family:var(--font-mono); font-size:12.5px; margin:0 0 8px; overflow-wrap:anywhere; color:var(--ink);}
+  .card ul{margin:0; padding-left:18px; font-size:13px;}
+  .card li{margin-bottom:6px;}
+
+  ul.plain{font-size:14px; padding-left:20px; max-width:74ch;}
+  ul.plain li{margin-bottom:7px;}
+
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:5px; overflow:hidden; margin:22px 0 0;}
+  .stat{background:var(--panel); padding:12px 14px;}
+  .stat b{display:block; font-family:var(--font-mono); font-size:20px; font-variant-numeric:tabular-nums; line-height:1.2;}
+  .stat span{font-size:11.5px; color:var(--ink-soft);}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Formato Único de Personal · C:\wamp64\www\Formato_Unico_Personal</p>
+  <h1>Mapa del sistema FUP</h1>
+  <p class="lede">Todo el proyecto en un archivo: la entrada y los permisos, las diez pantallas del menú, los cuatro flujos de captura, la anatomía de un generador de PDF, la cadena de autorización y la lista completa de IDs de consulta del WebService.</p>
+</header>
+
+<nav class="toc">
+  <ol>
+    <li><a href="#entrada">Entrada, sesión y permisos</a></li>
+    <li><a href="#menu">El menú y las diez pantallas</a></li>
+    <li><a href="#captura">Captura: FUP Original y FUP Manual</a></li>
+    <li><a href="#cct">Captura: FUP Cambio CT</a></li>
+    <li><a href="#generador">Anatomía de un generador de PDF</a></li>
+    <li><a href="#autorizacion">Cadena de autorización y reimpresión</a></li>
+    <li><a href="#carpetas">Carpetas del proyecto</a></li>
+    <li><a href="#pantallas">Pantallas activas y sus endpoints</a></li>
+    <li><a href="#generadores">Generadores de PDF</a></li>
+    <li><a href="#autocompletados">Autocompletados y catálogos</a></li>
+    <li><a href="#ids">IDs de consulta del WebService</a></li>
+    <li><a href="#hallazgos">Hallazgos y cosas que arrastra el proyecto</a></li>
+  </ol>
+</nav>
+
+<div class="stats">
+  <div class="stat"><b>~340</b><span>archivos .php fuera de librerías</span></div>
+  <div class="stat"><b>10</b><span>pantallas colgadas del menú</span></div>
+  <div class="stat"><b>3</b><span>servicios SOAP distintos</span></div>
+  <div class="stat"><b>1</b><span>conexión directa a SQL Server</span></div>
+  <div class="stat"><b>~170</b><span>IDs de consulta en uso</span></div>
+</div>
+
+<h2 id="entrada">1 · Entrada, sesión y permisos</h2>
+<p class="sub">Todo entra por <span class="path">index.php</span>. La sesión se valida contra un servicio externo y el menú se arma con lo que la base de permisos devuelve para ese usuario.</p>
+
+<figure>
+<div class="scroller">
+<svg viewBox="0 0 1200 340" role="img" aria-label="Flujo de entrada: el usuario pasa por el login nlogin, ValidarKey valida la llave contra el servicio ValidoKey, index.php abre la conexión directa a SQL Server y permisos.php arma el menú con las claves de opción del usuario.">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor"></polygon></marker>
+    <marker id="a1w" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="#8d2f2f"></polygon></marker>
+  </defs>
+
+  <rect class="nb-ext" x="20" y="40" width="190" height="66" rx="4"></rect>
+  <text class="t-b" x="36" y="62">Login institucional</text>
+  <text class="t-s" x="36" y="79">cgia.seslp.gob.mx/nlogin</text>
+  <text class="t-s" x="36" y="95">Default.aspx?app=1164</text>
+
+  <rect class="nb" x="270" y="40" width="210" height="66" rx="4"></rect>
+  <text class="t" x="286" y="62">ValidarKey.php</text>
+  <text class="t-s" x="286" y="79">ValidoKey en /nlws/Service.asmx</text>
+  <text class="t-s" x="286" y="95">key · usuario · app · IP · módulo</text>
+
+  <rect class="nb-warn" x="270" y="140" width="210" height="62" rx="4"></rect>
+  <text class="t" x="286" y="162">ValidarKey3.php</text>
+  <text class="t-warn" x="470" y="162" text-anchor="end">EN USO</text>
+  <text class="t-s" x="286" y="179">no valida nada: fija usuario</text>
+  <text class="t-s" x="286" y="194">&quot;Jonathan&quot; y app 1164</text>
+
+  <rect class="nb-mod" x="540" y="86" width="190" height="70" rx="4"></rect>
+  <text class="t-b" x="635" y="110" text-anchor="middle">index.php</text>
+  <text class="t-s" x="635" y="127" text-anchor="middle">1176 líneas</text>
+  <text class="t-s" x="635" y="143" text-anchor="middle">menú + formularios FUP</text>
+
+  <rect class="nb" x="790" y="40" width="200" height="62" rx="4"></rect>
+  <text class="t" x="806" y="62">Conexion/conexion.php</text>
+  <text class="t-s" x="806" y="79">sqlsrv_connect</text>
+  <text class="t-s" x="806" y="94">172.16.17.134\SBDCGIAPASO</text>
+
+  <rect class="nb" x="790" y="128" width="200" height="76" rx="4"></rect>
+  <text class="t" x="806" y="150">Conexion/permisos.php</text>
+  <text class="t-s" x="806" y="167">class Permisos</text>
+  <text class="t-s" x="806" y="182">Menu($app,$usuario,$con)</text>
+  <text class="t-s" x="806" y="197">mvc_permisos_opciones</text>
+
+  <rect class="nb-ext" x="1020" y="86" width="160" height="150" rx="4"></rect>
+  <text class="t-b" x="1034" y="108">$menuPrincipal</text>
+  <text class="t-s" x="1034" y="124">13 claves opc:</text>
+  <text class="t-sm" x="1034" y="140">Autorizacion_FUP</text>
+  <text class="t-sm" x="1034" y="154">FUP_Manual</text>
+  <text class="t-sm" x="1034" y="168">CrearFUP_CambioCT</text>
+  <text class="t-sm" x="1034" y="182">CrearFUP_CCT_Pendien</text>
+  <text class="t-sm" x="1034" y="196">Autorizacion_Captura</text>
+  <text class="t-sm" x="1034" y="210">Autorizacion_Cgrh</text>
+  <text class="t-sm" x="1034" y="224">Autorizacion_Admin …</text>
+
+  <line class="edge" x1="210" y1="73" x2="264" y2="73" marker-end="url(#a1)"></line>
+  <line class="edge" x1="480" y1="73" x2="534" y2="100" marker-end="url(#a1)"></line>
+  <line class="edge-warn" x1="480" y1="168" x2="534" y2="142" marker-end="url(#a1w)"></line>
+  <text class="el" x="505" y="130" text-anchor="middle">include</text>
+  <line class="edge" x1="730" y1="105" x2="784" y2="75" marker-end="url(#a1)"></line>
+  <line class="edge" x1="730" y1="135" x2="784" y2="160" marker-end="url(#a1)"></line>
+  <text class="el" x="757" y="196" text-anchor="middle">$con</text>
+  <line class="edge-d" x1="890" y1="102" x2="890" y2="122" marker-end="url(#a1)"></line>
+  <line class="edge" x1="990" y1="166" x2="1014" y2="150" marker-end="url(#a1)"></line>
+
+  <rect class="nb" x="20" y="250" width="1160" height="62" rx="4"></rect>
+  <text class="t-s" x="38" y="270">Librerías y clientes que carga casi todo el sistema</text>
+  <text class="t" x="38" y="288">Conexion/wsdl.php → $cliente  ·  Conexion/wsdl_foliacion.php → $cliente2  ·  Conexion/ServicioWeb.php (envuelve wsdl.php y muestra error amigable)</text>
+  <text class="t" x="38" y="304">Conexion/Metodos_Consultas/metodos_consultas.php  ·  Cascaron/Cascaron.php + fpdf181/ + fpdi/  ·  Codigo_Barras/barcode.php  ·  lib/nusoap.php  ·  PHPMailer/</text>
+</svg>
+</div>
+<figcaption>El recuadro rojo es lo que de verdad corre hoy: <span class="path">index.php</span> incluye <span class="path">ValidarKey3.php</span>, que no consulta el servicio y fija el usuario a mano. <span class="path">ValidarKey.php</span> y <span class="path">ValidarKey1.php</span> siguen en el proyecto; <span class="path">ValidarKey1.php</span> lo usan <span class="path">Pdf/Antecedentes.php</span> y <span class="path">Pdf/Opcion.php</span>.</figcaption>
+</figure>
+
+<h2 id="menu">2 · El menú y las diez pantallas</h2>
+<p class="sub">Cada opción del menú carga una pantalla en un <code>iframe</code> con <code>?usuario=</code>, y cada pantalla se alimenta de su propio endpoint <span class="path">data_*.php</span>. Las dos primeras filas no son pantallas aparte: son formularios que viven dentro de <span class="path">index.php</span>.</p>
+
+<figure>
+<div class="scroller">
+<svg viewBox="0 0 1240 680" role="img" aria-label="Mapa de las claves de permiso del menú hacia las diez pantallas en iframe y hacia los endpoints data que alimentan cada una.">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor"></polygon></marker>
+    <marker id="a2m" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto"><polygon points="0,0 10,4 0,8" fill="#8a5509"></polygon></marker>
+  </defs>
+
+  <text class="lane-label" x="20" y="28">Clave opc</text>
+  <text class="lane-label" x="330" y="28">Pantalla · iframe de index.php</text>
+  <text class="lane-label" x="800" y="28">Endpoint de datos · id de consulta</text>
+
+  <rect class="nb" x="20" y="44" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="68">Autorizacion_FUP</text>
+  <rect class="nb" x="330" y="44" width="400" height="38" rx="3"></rect><text class="t" x="344" y="68">formulario FUP (dentro de index.php)</text>
+  <rect class="nb" x="800" y="44" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="68">Js/recibir.php · 66 · 204  →  Pdf/Antecedentes.php · 157</text>
+  <line class="edge" x1="270" y1="63" x2="324" y2="63" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="63" x2="794" y2="63" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="92" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="116">FUP_Manual</text>
+  <rect class="nb" x="330" y="92" width="400" height="38" rx="3"></rect><text class="t" x="344" y="116">formulario FUP Manual (en index.php)</text>
+  <rect class="nb" x="800" y="92" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="116">Js/recibir_ma.php · 66 · 204  →  Antecedentes_manual.php · 157 · 191</text>
+  <line class="edge" x1="270" y1="111" x2="324" y2="111" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="111" x2="794" y2="111" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="140" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="164">CrearFUP_CambioCT</text>
+  <rect class="nb-mod" x="330" y="140" width="400" height="38" rx="3"></rect><text class="t" x="344" y="164">pantallas/FUP_CambioCT.php</text><text class="t-mod" x="716" y="164" text-anchor="end">AQUÍ SE CORRIGIÓ</text>
+  <rect class="nb" x="800" y="140" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="164">pantallas/data_cambio_CT.php · 1267</text>
+  <line class="edge" x1="270" y1="159" x2="324" y2="159" marker-end="url(#a2)"></line><line class="edge-mod" x1="730" y1="159" x2="794" y2="159" marker-end="url(#a2m)"></line>
+
+  <rect class="nb" x="20" y="188" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="212">CrearFUP_CambioCT</text>
+  <rect class="nb" x="330" y="188" width="400" height="38" rx="3"></rect><text class="t" x="344" y="212">pantallas/FUP_CambioCT90.php</text>
+  <rect class="nb" x="800" y="188" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="212">pantallas/data_cambio_CT90.php · 1296</text>
+  <line class="edge" x1="270" y1="207" x2="324" y2="207" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="207" x2="794" y2="207" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="236" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="260">CrearFUP_CCT_Pendien</text>
+  <rect class="nb" x="330" y="236" width="400" height="38" rx="3"></rect><text class="t" x="344" y="260">pantallas/FUP_CambioCT_Pendientes.php</text>
+  <rect class="nb" x="800" y="236" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="260">pantallas/data_cambio_CT_Pendientes.php · 1288</text>
+  <line class="edge" x1="270" y1="255" x2="324" y2="255" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="255" x2="794" y2="255" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="284" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="308">Autorizacion_Captura</text>
+  <rect class="nb" x="330" y="284" width="400" height="38" rx="3"></rect><text class="t" x="344" y="308">pantallas/Pendientes_Paty.php</text>
+  <rect class="nb" x="800" y="284" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="308">data_Paty_Unico.php?cons=1…11 · 1265 · 1269 · 1312 · 193 · 212 …</text>
+  <line class="edge" x1="270" y1="303" x2="324" y2="303" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="303" x2="794" y2="303" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="332" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="356">Autorizacion_Cgrh</text>
+  <rect class="nb" x="330" y="332" width="400" height="38" rx="3"></rect><text class="t" x="344" y="356">pantallas/Pendientes_Maestra_Guadalupe.php</text>
+  <rect class="nb" x="800" y="332" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="356">data_mtra-guadalupe_Unico.php?cons=1…17 · data_mtra.php · 265</text>
+  <line class="edge" x1="270" y1="351" x2="324" y2="351" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="351" x2="794" y2="351" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="380" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="404">Autorizacion_Admin</text>
+  <rect class="nb" x="330" y="380" width="400" height="38" rx="3"></rect><text class="t" x="344" y="404">pantallas/Pendientes_Directora.php</text>
+  <rect class="nb" x="800" y="380" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="404">data_Admin_Unico.php?cons=1…15 · 1271 · 1306 · 1307 · 1314 …</text>
+  <line class="edge" x1="270" y1="399" x2="324" y2="399" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="399" x2="794" y2="399" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="428" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="452">Autorizacion_FUP</text>
+  <rect class="nb" x="330" y="428" width="400" height="38" rx="3"></rect><text class="t" x="344" y="452">pantallas/Fups_Autorizados.php</text>
+  <rect class="nb" x="800" y="428" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="452">data_fups_autorizados.php?cons=1…3 · 209 · 1277 · 2323</text>
+  <line class="edge" x1="270" y1="447" x2="324" y2="447" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="447" x2="794" y2="447" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="476" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="500">Autorizacion_Captura</text>
+  <rect class="nb" x="330" y="476" width="400" height="38" rx="3"></rect><text class="t" x="344" y="500">pantallas/Fups_Autorizados_ID4.php</text>
+  <rect class="nb" x="800" y="476" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="500">data_fups_autorizados4_Paty.php · 243</text>
+  <line class="edge" x1="270" y1="495" x2="324" y2="495" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="495" x2="794" y2="495" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="524" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="548">Reimpresion_Original</text>
+  <rect class="nb" x="330" y="524" width="400" height="38" rx="3"></rect><text class="t" x="344" y="548">pantallas/Reimpresion_Original.php</text>
+  <rect class="nb" x="800" y="524" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="548">Js/funciones_rOriginal10.js → checar.php · 204 · editar_fup.php</text>
+  <line class="edge" x1="270" y1="543" x2="324" y2="543" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="543" x2="794" y2="543" marker-end="url(#a2)"></line>
+
+  <rect class="nb" x="20" y="572" width="250" height="38" rx="3"></rect><text class="t-sm" x="34" y="596">Reporte_Autorizar</text>
+  <rect class="nb" x="330" y="572" width="400" height="38" rx="3"></rect><text class="t" x="344" y="596">pantallas/Reporte_Autorizados.php</text>
+  <rect class="nb" x="800" y="572" width="420" height="38" rx="3"></rect><text class="t-sm" x="814" y="596">data_fups_reportes_autorizados.php?cons=1…11 · 256</text>
+  <line class="edge" x1="270" y1="591" x2="324" y2="591" marker-end="url(#a2)"></line><line class="edge" x1="730" y1="591" x2="794" y2="591" marker-end="url(#a2)"></line>
+
+  <rect class="nb-bus" x="20" y="624" width="1200" height="40" rx="3"></rect>
+  <text class="t-s" x="38" y="640">Claves opc que existen en el menú pero cuya pantalla ya no se carga desde index.php:</text>
+  <text class="t-sm" x="38" y="656">Borrar · Buscar_Documento · Impresion_Original · Reimpresion  —  quedan de versiones anteriores del sistema</text>
+</svg>
+</div>
+<figcaption>El usuario llamado <code>Paty</code> y el usuario <code>Jonathan</code> tienen una rama aparte en el menú: para ellos <span class="path">index.php</span> salta las opciones de captura y muestra directamente AUTORIZACIÓN ADMIN.</figcaption>
+</figure>
+
+<h2 id="captura">3 · Captura: FUP Original y FUP Manual</h2>
+<p class="sub">Los dos flujos antiguos. Salen de un formulario de <span class="path">index.php</span>, abren una pestaña nueva con la pantalla de antecedentes y terminan en un generador de casi 2 800 líneas.</p>
+
+<figure>
+<div class="scroller">
+<svg viewBox="0 0 1200 420" role="img" aria-label="Flujo de captura del FUP Original y del FUP Manual: formulario en index.php, enviar6.js, recibir.php, Antecedentes.php con script_Tabla.php y el generador CreacionFUPOriginal.php que escribe el PDF.">
+  <defs><marker id="a3" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor"></polygon></marker></defs>
+
+  <text class="lane-label" x="20" y="26">FUP Original</text>
+  <rect class="nb" x="20" y="40" width="190" height="56" rx="4"></rect>
+  <text class="t" x="34" y="60">formulario FUP</text>
+  <text class="t-s" x="34" y="77">index.php</text>
+  <text class="t-s" x="34" y="91">num_docto · rfc · oficio</text>
+
+  <rect class="nb" x="252" y="40" width="190" height="56" rx="4"></rect>
+  <text class="t" x="266" y="60">Js/enviar6.js</text>
+  <text class="t-s" x="266" y="77">valida y arma el POST</text>
+
+  <rect class="nb" x="484" y="40" width="200" height="56" rx="4"></rect>
+  <text class="t" x="498" y="60">Js/recibir.php</text>
+  <text class="t-s" x="498" y="77">consultas 66 y 204</text>
+  <text class="t-s" x="498" y="91">checarDocto() · cve_mov · mot_mov</text>
+
+  <rect class="nb" x="726" y="40" width="210" height="56" rx="4"></rect>
+  <text class="t" x="740" y="60">Pdf/Antecedentes.php</text>
+  <text class="t-s" x="740" y="77">pestaña nueva · consulta 157</text>
+  <text class="t-s" x="740" y="91">ValidarKey1 + permisos</text>
+
+  <rect class="nb" x="978" y="40" width="202" height="56" rx="4"></rect>
+  <text class="t" x="992" y="60">Scripts/script_Tabla.php</text>
+  <text class="t-s" x="992" y="77">incluido en la pantalla</text>
+  <text class="t-s" x="992" y="91">arma el JSON de la selección</text>
+
+  <line class="edge" x1="210" y1="68" x2="246" y2="68" marker-end="url(#a3)"></line>
+  <line class="edge" x1="442" y1="68" x2="478" y2="68" marker-end="url(#a3)"></line>
+  <text class="el" x="460" y="60" text-anchor="middle">POST</text>
+  <line class="edge" x1="684" y1="68" x2="720" y2="68" marker-end="url(#a3)"></line>
+  <text class="el" x="702" y="60" text-anchor="middle">open</text>
+  <line class="edge" x1="936" y1="68" x2="972" y2="68" marker-end="url(#a3)"></line>
+
+  <text class="lane-label" x="20" y="146">FUP Manual</text>
+  <rect class="nb" x="20" y="160" width="190" height="56" rx="4"></rect>
+  <text class="t" x="34" y="180">formulario FUP Manual</text>
+  <text class="t-s" x="34" y="197">index.php</text>
+
+  <rect class="nb" x="252" y="160" width="190" height="56" rx="4"></rect>
+  <text class="t" x="266" y="180">Js/enviar_ma6.js</text>
+  <text class="t-s" x="266" y="197">+ Js/borrar.php · 156</text>
+
+  <rect class="nb" x="484" y="160" width="200" height="56" rx="4"></rect>
+  <text class="t" x="498" y="180">Js/recibir_ma.php</text>
+  <text class="t-s" x="498" y="197">consultas 66 y 204</text>
+
+  <rect class="nb" x="726" y="160" width="210" height="56" rx="4"></rect>
+  <text class="t" x="740" y="180">Pdf/Antecedentes_manual.php</text>
+  <text class="t-s" x="740" y="197">consultas 157 y 191</text>
+
+  <rect class="nb" x="978" y="160" width="202" height="56" rx="4"></rect>
+  <text class="t" x="992" y="180">script_Tabla_manual.php</text>
+
+  <line class="edge" x1="210" y1="188" x2="246" y2="188" marker-end="url(#a3)"></line>
+  <line class="edge" x1="442" y1="188" x2="478" y2="188" marker-end="url(#a3)"></line>
+  <line class="edge" x1="684" y1="188" x2="720" y2="188" marker-end="url(#a3)"></line>
+  <line class="edge" x1="936" y1="188" x2="972" y2="188" marker-end="url(#a3)"></line>
+
+  <rect class="nb" x="340" y="270" width="380" height="76" rx="4"></rect>
+  <text class="t" x="356" y="291">Pdf/crearPDF/CreacionFUPOriginal.php</text>
+  <text class="t-s" x="356" y="308">2 790 líneas · 64 · 66 · 129 · 136 · 137 · 155 · 171 · 185 · 251 · 259</text>
+  <text class="t-s" x="356" y="323">también crearPDF/COriginal.php y crearPDF/crearFUP.php</text>
+  <text class="t-s" x="356" y="338">F_Insert: FUPID · FUPID_4 · FUPPER · FUPPLA · FUPPRE · FUPCMP</text>
+
+  <rect class="nb" x="760" y="270" width="380" height="76" rx="4"></rect>
+  <text class="t" x="776" y="291">CreacionFUPOriginal_manual.php</text>
+  <text class="t-s" x="776" y="308">2 596 líneas · 1 · 64 · 66 · 129 · 137 · 155 · 171 · 185 · 251 · 259</text>
+  <text class="t-s" x="776" y="323">F_Insert: FUPID_4_manual · FUPID_CT_PendientesM · FUPPER …</text>
+  <text class="t-s" x="776" y="338">+ CreacionFUPMasivo_Correccion.php, 2 806 líneas</text>
+
+  <line class="edge" x1="1060" y1="96" x2="1060" y2="140" ></line>
+  <line class="edge" x1="1060" y1="140" x2="530" y2="140" ></line>
+  <line class="edge" x1="530" y1="140" x2="530" y2="264" marker-end="url(#a3)"></line>
+  <text class="el" x="700" y="134" text-anchor="middle">POST men = base64(JSON de la tabla)</text>
+  <line class="edge" x1="1079" y1="216" x2="1079" y2="264" marker-end="url(#a3)"></line>
+
+  <rect class="nb-ext" x="20" y="366" width="1160" height="40" rx="4"></rect>
+  <text class="t-s" x="38" y="382">Salida de los dos flujos</text>
+  <text class="t" x="38" y="398">FUPs/Masivo_Original/*.pdf  ·  bitácoras crearPDF/Creados_Original*.txt  ·  insertarFUPID → consulta 150 / 251  ·  insertarPDFID → consulta 259</text>
+</svg>
+</div>
+<figcaption>Los dos caminos son el mismo patrón con archivos distintos, y es el mismo patrón del Cambio CT: una pantalla arma un JSON con lo seleccionado, un generador lo decodifica, inserta por secciones y dibuja el PDF.</figcaption>
+</figure>
+
+<h2 id="cct">4 · Captura: FUP Cambio CT</h2>
+<p class="sub">El flujo que se revisó. Los dos archivos corregidos van en ocre.</p>
+
+<figure>
+<div class="scroller">
+<svg viewBox="0 0 1240 770" role="img" aria-label="Diagrama de los tres carriles del flujo FUP Cambio CT: navegador, servidor PHP y recursos externos, con las llamadas AJAX entre FUP_CambioCT.php, data_cambio_CT.php, CrearPrevio.php, AntecedentesPrevio.php y CreacionFUPOriginal_CT_Editar.php, y las salidas al WebService SOAP, al disco y a las bitácoras.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor"></polygon></marker>
+    <marker id="ahm" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="#8a5509"></polygon></marker>
+    <marker id="ahs" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor" opacity="0.6"></polygon></marker>
+  </defs>
+
+  <rect class="lane" x="20" y="24" width="1200" height="250" rx="5"></rect>
+  <text class="lane-label" x="34" y="46">Navegador — pantallas/FUP_CambioCT.php · jQuery 3.6 + jQuery UI + DataTables</text>
+
+  <rect class="nb" x="34" y="78" width="186" height="56" rx="4"></rect>
+  <text class="t-b" x="127" y="100" text-anchor="middle">#myTable</text>
+  <text class="t-s" x="127" y="116" text-anchor="middle">grid · botón Previo</text>
+  <text class="t-s" x="127" y="129" text-anchor="middle">botón FUP</text>
+
+  <rect class="nb" x="280" y="78" width="186" height="56" rx="4"></rect>
+  <text class="t-b" x="373" y="100" text-anchor="middle">#dialog-confirmPDF</text>
+  <text class="t-s" x="373" y="116" text-anchor="middle">iframe #pdf_qna</text>
+  <text class="t-s" x="373" y="129" text-anchor="middle">botones Salir / Editar</text>
+
+  <rect class="nb" x="526" y="78" width="186" height="56" rx="4"></rect>
+  <text class="t-b" x="619" y="100" text-anchor="middle">#exampleModalM</text>
+  <text class="t-s" x="619" y="116" text-anchor="middle">filtro + observaciones</text>
+  <text class="t-s" x="619" y="129" text-anchor="middle">botón Ver Registros</text>
+
+  <rect class="nb" x="772" y="78" width="186" height="56" rx="4"></rect>
+  <text class="t-b" x="865" y="100" text-anchor="middle">#load_data</text>
+  <text class="t-s" x="865" y="116" text-anchor="middle">1ª tabla</text>
+  <text class="t-s" x="865" y="129" text-anchor="middle">antecedentes disponibles</text>
+
+  <rect class="nb-mod" x="1018" y="78" width="186" height="56" rx="4"></rect>
+  <text class="t-b" x="1111" y="100" text-anchor="middle">#tabla2</text>
+  <text class="t-s" x="1111" y="116" text-anchor="middle">2ª tabla</text>
+  <text class="t-s" x="1111" y="129" text-anchor="middle">antecedentes elegidos</text>
+
+  <line class="edge" x1="220" y1="106" x2="274" y2="106" marker-end="url(#ah)"></line>
+  <text class="el" x="247" y="100" text-anchor="middle">Previo</text>
+  <line class="edge" x1="466" y1="106" x2="520" y2="106" marker-end="url(#ah)"></line>
+  <text class="el" x="493" y="100" text-anchor="middle">Editar</text>
+  <line class="edge" x1="712" y1="106" x2="766" y2="106" marker-end="url(#ah)"></line>
+  <text class="el" x="739" y="100" text-anchor="middle">Registros</text>
+  <line class="edge-mod" x1="958" y1="106" x2="1012" y2="106" marker-end="url(#ahm)"></line>
+  <text class="el-mod" x="985" y="100" text-anchor="middle">.envio</text>
+
+  <rect class="nb-mod" x="526" y="190" width="678" height="58" rx="4"></rect>
+  <text class="t" x="546" y="212">Scripts/script_Tabla_CT_Previo.php</text>
+  <text class="t-mod" x="1184" y="212" text-anchor="end">CORREGIDO</text>
+  <text class="t-s" x="546" y="230">incluido dentro de la pantalla · handler del botón #btnGetData «Crear FUP»</text>
+  <text class="t-s" x="546" y="243">serializa cada fila de #tabla2 en 14 objetos y la manda en base64</text>
+
+  <line class="edge-mod" x1="1111" y1="134" x2="1111" y2="184" marker-end="url(#ahm)"></line>
+  <text class="el-mod" x="1101" y="162" text-anchor="end">lee 14 celdas por fila</text>
+
+  <rect class="lane" x="20" y="294" width="1200" height="226" rx="5"></rect>
+  <text class="lane-label" x="34" y="316">Servidor PHP — C:\wamp64\www\Formato_Unico_Personal</text>
+
+  <rect class="nb" x="34" y="340" width="186" height="60" rx="4"></rect>
+  <text class="t" x="127" y="360" text-anchor="middle">pantallas/</text>
+  <text class="t" x="127" y="374" text-anchor="middle">data_cambio_CT.php</text>
+  <text class="t-s" x="127" y="391" text-anchor="middle">consulta 1267</text>
+
+  <rect class="nb" x="280" y="340" width="186" height="60" rx="4"></rect>
+  <text class="t" x="373" y="360" text-anchor="middle">Pdf/CrearPDF/</text>
+  <text class="t" x="373" y="374" text-anchor="middle">CrearPrevio.php</text>
+  <text class="t-s" x="373" y="391" text-anchor="middle">1281 · 1282 · 1283</text>
+
+  <rect class="nb" x="772" y="340" width="186" height="60" rx="4"></rect>
+  <text class="t" x="865" y="360" text-anchor="middle">Pdf/</text>
+  <text class="t" x="865" y="374" text-anchor="middle">AntecedentesPrevio.php</text>
+  <text class="t-s" x="865" y="391" text-anchor="middle">1281 · 1284 – 1287</text>
+
+  <line class="edge" x1="127" y1="134" x2="127" y2="334" marker-end="url(#ah)"></line>
+  <line class="edge-d" x1="139" y1="334" x2="139" y2="140" marker-end="url(#ahs)"></line>
+  <text class="el" x="150" y="200">ajax DataTables</text>
+  <text class="el" x="150" y="213">JSON del grid</text>
+
+  <line class="edge" x1="373" y1="134" x2="373" y2="334" marker-end="url(#ah)"></line>
+  <line class="edge-d" x1="385" y1="334" x2="385" y2="140" marker-end="url(#ahs)"></line>
+  <text class="el" x="396" y="200">POST id · oficio</text>
+  <text class="el" x="396" y="213">area · rfc · usuario</text>
+  <text class="el" x="396" y="226">← ruta del PDF</text>
+
+  <line class="edge" x1="865" y1="134" x2="865" y2="334" marker-end="url(#ah)"></line>
+  <line class="edge-d" x1="877" y1="334" x2="877" y2="140" marker-end="url(#ahs)"></line>
+  <text class="el" x="888" y="200">POST seleccion · id</text>
+  <text class="el" x="888" y="213">oficio · area · rfc</text>
+  <text class="el" x="888" y="226">← &lt;tr&gt; de la 1ª tabla</text>
+
+  <rect class="nb-mod" x="988" y="340" width="216" height="60" rx="4"></rect>
+  <text class="t" x="1096" y="358" text-anchor="middle">Pdf/crearPDF/</text>
+  <text class="t" x="1096" y="372" text-anchor="middle">CreacionFUPOriginal</text>
+  <text class="t" x="1096" y="384" text-anchor="middle">_CT_Editar.php</text>
+  <text class="t-mod" x="1096" y="397" text-anchor="middle">CORREGIDO</text>
+
+  <line class="edge-mod" x1="1096" y1="248" x2="1096" y2="334" marker-end="url(#ahm)"></line>
+  <text class="el-mod" x="1086" y="278" text-anchor="end">POST men = base64(JSON)</text>
+  <text class="el-mod" x="1086" y="291" text-anchor="end">+ obs · checO1–4 · usu</text>
+
+  <rect class="nb-bus" x="34" y="438" width="1170" height="62" rx="4"></rect>
+  <text class="t-s" x="52" y="457">Incluido por los cuatro archivos de arriba</text>
+  <text class="t" x="52" y="474">Conexion/wsdl.php → $cliente  ·  Conexion/wsdl_foliacion.php → $cliente2  ·  Conexion/Metodos_Consultas/metodos_consultas.php</text>
+  <text class="t" x="52" y="490">Cascaron/Cascaron.php → clase PDF (FPDF + FPDI)  ·  Codigo_Barras/barcode.php  ·  Conexion/ServicioWeb.php (en la pantalla)</text>
+
+  <line class="edge-d" x1="127" y1="400" x2="127" y2="432" marker-end="url(#ahs)"></line>
+  <line class="edge-d" x1="373" y1="400" x2="373" y2="432" marker-end="url(#ahs)"></line>
+  <line class="edge-d" x1="865" y1="400" x2="865" y2="432" marker-end="url(#ahs)"></line>
+  <line class="edge-d" x1="1096" y1="400" x2="1096" y2="432" marker-end="url(#ahs)"></line>
+
+  <rect class="lane" x="20" y="550" width="1200" height="196" rx="5"></rect>
+  <text class="lane-label" x="34" y="572">Fuera de la aplicación</text>
+
+  <rect class="nb-ext" x="34" y="596" width="272" height="78" rx="4"></rect>
+  <text class="t-b" x="48" y="616">WebService_FUP · SOAP</text>
+  <text class="t-s" x="48" y="633">appcgia.seslp.gob.mx/WebService_FUP</text>
+  <text class="t-s" x="48" y="647">getConsulta(Resultado, Argumento, Accion)</text>
+  <text class="t-s" x="48" y="664">→ SQL Server: lee e inserta el FUP</text>
+
+  <rect class="nb-ext" x="330" y="596" width="250" height="78" rx="4"></rect>
+  <text class="t-b" x="344" y="616">WebService_FUP_Foliacion</text>
+  <text class="t-s" x="344" y="633">getFolio(Argumento)</text>
+  <text class="t-s" x="344" y="647">asigna el num_docto definitivo</text>
+  <text class="t-s" x="344" y="664">solo si el folio trae 000001</text>
+
+  <rect class="nb-ext" x="604" y="596" width="294" height="78" rx="4"></rect>
+  <text class="t-b" x="618" y="616">Disco · FUPs/Masivo_Original/</text>
+  <text class="t-s" x="618" y="633">Previo/ …_ORIGINAL_Qna_Previo.pdf</text>
+  <text class="t-s" x="618" y="647">CCT/ …_ORIGINAL_Qna.pdf</text>
+  <text class="t-s" x="618" y="664">el definitivo lo relee el botón Ver FUP</text>
+
+  <rect class="nb-ext" x="922" y="596" width="282" height="78" rx="4"></rect>
+  <text class="t-b" x="936" y="616">Bitácoras .txt</text>
+  <text class="t-s" x="936" y="633">Creados_Original_CT_Editados.txt</text>
+  <text class="t-s" x="936" y="647">Creados_Original_CT_Previo.txt</text>
+  <text class="t-s" x="936" y="664">pantallas/Documento_Mostrado.txt</text>
+
+  <line class="edge" x1="170" y1="500" x2="170" y2="590" marker-end="url(#ah)"></line>
+  <text class="el" x="180" y="528">getConsulta()</text>
+  <line class="edge" x1="455" y1="500" x2="455" y2="590" marker-end="url(#ah)"></line>
+  <text class="el" x="465" y="528">getFolio()</text>
+  <line class="edge" x1="751" y1="500" x2="751" y2="590" marker-end="url(#ah)"></line>
+  <text class="el" x="761" y="528">$pdf-&gt;Output('F', …)</text>
+  <line class="edge" x1="1063" y1="500" x2="1063" y2="590" marker-end="url(#ah)"></line>
+  <text class="el" x="1073" y="528">fopen / fputs</text>
+</svg>
+</div>
+<figcaption>Los otros tres botones de esta pantalla pegan a <span class="path">buscar_PDF_local_Previo.php</span> (Ver FUP), <span class="path">update_autorizar_Paty_ct.php</span> (Autorizar) y <span class="path">cancelar_cgrh.php</span> (Cancelar, consultas 156 y 205). Las dos pantallas hermanas, <span class="path">FUP_CambioCT90.php</span> y <span class="path">FUP_CambioCT_Pendientes.php</span>, repiten la misma estructura con <span class="path">CrearPrevio90.php</span> y <span class="path">CrearPrevio_Pendientes.php</span>.</figcaption>
+</figure>
+
+<h3>Lo que se corrigió</h3>
+<div class="cards">
+  <div class="card">
+    <h4>Scripts/script_Tabla_CT_Previo.php</h4>
+    <ul>
+      <li>Leía cada celda con <code>cells[i].childNodes[0].data</code>. Una celda vacía no tiene nodos hijos, así que lanzaba <code>TypeError</code> y abortaba el handler <em>antes</em> del <code>$.ajax</code>: no se llamaba al PHP y no se guardaba nada.</li>
+      <li>Pasa fácil porque en <span class="path">AntecedentesPrevio.php</span> las variables <code>$ct</code> y <code>$area</code> no se inicializan, y <code>num_docto</code>, <code>mot_mov</code> o las quincenas pueden venir en blanco.</li>
+      <li>Ahora lee con <code>textContent</code> en una función <code>celda()</code>, hace <code>trim()</code>, ignora la fila «No hay registros seleccionados», calcula <code>_total</code> de las filas reales y avisa si no hay selección. Se añadió <code>console.log</code> y callback <code>error</code>.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Pdf/crearPDF/CreacionFUPOriginal_CT_Editar.php</h4>
+    <ul>
+      <li><strong>Línea 877:</strong> <code>while($a &lt;= $tot_resul_ant*13)</code> → <code>while($a &lt; $tot_resul_ant*14)</code>. El JSON trae 14 objetos por antecedente y el índice avanza de 14 en 14.</li>
+      <li><strong>Líneas 419 y 539:</strong> en las páginas múltiplo de 10 el arranque quedaba por encima del tope y esa página no insertaba ni dibujaba nada. Ahora arranca en <code>$reccG-$LimiteM</code> con tope <code>$reccG</code>.</li>
+      <li><strong>Líneas 571 y 604:</strong> se quitó <code>if($tot_resul_ant==15){ $tot_resul_ant++; }</code>, parche que solo compensaba el tope viejo.</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Las 14 columnas que viajan por antecedente</h3>
+<p class="sub">El orden importa: el PHP las lee por posición, no por nombre.</p>
+<div class="tscroll">
+<table>
+  <thead><tr><th>#</th><th>Celda de #tabla2</th><th>Clave JSON</th><th>Índice PHP</th><th>#</th><th>Celda de #tabla2</th><th>Clave JSON</th><th>Índice PHP</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td>CP</td><td><code>_cod_pago</code></td><td class="num">$a+1</td><td class="num">8</td><td>Nivel de sueldo</td><td><code>_nivel_sdo</code></td><td class="num">$a+8</td></tr>
+    <tr><td class="num">2</td><td>Unidad</td><td><code>_unidad</code></td><td class="num">$a+2</td><td class="num">9</td><td>Qna. inicial</td><td><code>_qna_ini</code></td><td class="num">$a+9</td></tr>
+    <tr><td class="num">3</td><td>Subunidad</td><td><code>_subunidad</code></td><td class="num">$a+3</td><td class="num">10</td><td>Qna. final</td><td><code>_qna_fin</code></td><td class="num">$a+10</td></tr>
+    <tr><td class="num">4</td><td>Puesto</td><td><code>_puesto</code></td><td class="num">$a+4</td><td class="num">11</td><td>Núm. documento</td><td><code>_num_doc</code></td><td class="num">$a+11</td></tr>
+    <tr><td class="num">5</td><td>Horas</td><td><code>_horas</code></td><td class="num">$a+5</td><td class="num">12</td><td>CT</td><td><code>_ct</code></td><td class="num">$a+12</td></tr>
+    <tr><td class="num">6</td><td>Plaza</td><td><code>_plaza</code></td><td class="num">$a+6</td><td class="num">13</td><td>Valor2 · oculta</td><td><code>_valor2</code></td><td class="num">$a+13</td></tr>
+    <tr><td class="num">7</td><td>Motivo</td><td><code>_mot_mov</code></td><td class="num">$a+7</td><td class="num">14</td><td>Área · oculta</td><td><code>_areas</code></td><td class="num">$a+14</td></tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13.5px; color:var(--ink-soft); margin-top:14px;">El <code>CONCEPTO</code> que se guarda sale del nivel de sueldo dentro del PHP (3 → 07, 4 → 7A, 5 → 7B, 6 → BC, 7 → 7C, 8 → 7D, 9 → 7E). <strong>El CT y el nivel de sueldo no se guardan como campos propios</strong> en la consulta 1303: viajan en el JSON y se dibujan en el PDF, pero en la base solo queda el <code>CONCEPTO</code>.</p>
+
+<h2 id="generador">5 · Anatomía de un generador de PDF</h2>
+<p class="sub">Los nueve generadores grandes del proyecto tienen todos la misma forma. Entender uno es entender los nueve.</p>
+
+<figure>
+<div class="scroller">
+<svg viewBox="0 0 1200 470" role="img" aria-label="Anatomía común de un generador de PDF: recibe el POST, foliación, consulta las cuatro secciones al WebService, y por cada sección inserta con un archivo de F_Insert y dibuja con uno de Mostrar, antes de escribir el PDF y cerrar el documento.">
+  <defs><marker id="a5" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor"></polygon></marker></defs>
+
+  <rect class="nb" x="20" y="30" width="250" height="88" rx="4"></rect>
+  <text class="t-b" x="36" y="52">1 · Entrada</text>
+  <text class="t-s" x="36" y="70">$_POST: id · oficio · area · rfc</text>
+  <text class="t-s" x="36" y="85">men = base64(JSON seleccionado)</text>
+  <text class="t-s" x="36" y="100">usu · obs · ops · checO1–4</text>
+  <text class="t-s" x="36" y="113">incluye Cascaron + wsdl + barcode</text>
+
+  <rect class="nb" x="310" y="30" width="250" height="88" rx="4"></rect>
+  <text class="t-b" x="326" y="52">2 · Folio</text>
+  <text class="t-s" x="326" y="70">si el num_docto trae 000001:</text>
+  <text class="t-s" x="326" y="85">$cliente2-&gt;getFolio()</text>
+  <text class="t-s" x="326" y="100">si no, se conserva el num_docto</text>
+  <text class="t-s" x="326" y="113">(solo en los generadores de CCT)</text>
+
+  <rect class="nb" x="600" y="30" width="250" height="88" rx="4"></rect>
+  <text class="t-b" x="616" y="52">3 · Consulta las secciones</text>
+  <text class="t-s" x="616" y="70">antecedentes: del POST o 95 / 1281</text>
+  <text class="t-s" x="616" y="85">movimientos: 137 / 1282 / 187</text>
+  <text class="t-s" x="616" y="100">trabajador: 129 / 163 / 1283</text>
+  <text class="t-s" x="616" y="113">complementos: 189 · firmas: 9</text>
+
+  <rect class="nb" x="890" y="30" width="290" height="88" rx="4"></rect>
+  <text class="t-b" x="906" y="52">4 · Recorrido por páginas</text>
+  <text class="t-s" x="906" y="70">while ($reccG &lt;= $tot_glo)</text>
+  <text class="t-s" x="906" y="85">límites: 10 antecedentes, 10 movimientos,</text>
+  <text class="t-s" x="906" y="100">5 complementos por hoja</text>
+  <text class="t-s" x="906" y="113">$filas dice dónde arranca cada hoja</text>
+
+  <line class="edge" x1="270" y1="74" x2="304" y2="74" marker-end="url(#a5)"></line>
+  <line class="edge" x1="560" y1="74" x2="594" y2="74" marker-end="url(#a5)"></line>
+  <line class="edge" x1="850" y1="74" x2="884" y2="74" marker-end="url(#a5)"></line>
+
+  <rect class="nb-bus" x="20" y="150" width="1160" height="176" rx="5"></rect>
+  <text class="t" x="40" y="172">5 · Por cada renglón de cada sección: una función que inserta y un include que dibuja</text>
+
+  <rect class="nb" x="48" y="190" width="266" height="54" rx="4"></rect>
+  <text class="t-sm" x="62" y="209">ant() → insertarFUPPRE()</text>
+  <text class="t-s" x="62" y="224">F_Insert/FUPPRE.php · 149</text>
+  <text class="t-s" x="62" y="238">FUPPRECT.php · 1303 (Cambio CT)</text>
+
+  <rect class="nb" x="330" y="190" width="266" height="54" rx="4"></rect>
+  <text class="t-sm" x="344" y="209">mov() → insertarFUPMOV()</text>
+  <text class="t-s" x="344" y="224">F_Insert/FUPPLA.php · 138</text>
+
+  <rect class="nb" x="612" y="190" width="266" height="54" rx="4"></rect>
+  <text class="t-sm" x="626" y="209">tra() → insertarFUPPER()</text>
+  <text class="t-s" x="626" y="224">F_Insert/FUPPER.php · 146</text>
+
+  <rect class="nb" x="894" y="190" width="258" height="54" rx="4"></rect>
+  <text class="t-sm" x="908" y="209">cmp() → insertarFUPCMP()</text>
+  <text class="t-s" x="908" y="224">F_Insert/FUPCMP.php · 159</text>
+
+  <rect class="nb" x="48" y="260" width="266" height="50" rx="4"></rect>
+  <text class="t-sm" x="62" y="279">Mostrar/pdfant.php</text>
+  <text class="t-s" x="62" y="295">posiciones del antecedente</text>
+
+  <rect class="nb" x="330" y="260" width="266" height="50" rx="4"></rect>
+  <text class="t-sm" x="344" y="279">Mostrar/pdfmov.php</text>
+  <text class="t-s" x="344" y="295">posiciones del movimiento</text>
+
+  <rect class="nb" x="612" y="260" width="266" height="50" rx="4"></rect>
+  <text class="t-sm" x="626" y="279">Mostrar/pdftra.php · pdftraCCT.php</text>
+  <text class="t-s" x="626" y="295">datos personales + código de barras</text>
+
+  <rect class="nb" x="894" y="260" width="258" height="50" rx="4"></rect>
+  <text class="t-sm" x="908" y="279">Mostrar/pdfcmp.php</text>
+  <text class="t-s" x="908" y="295">+ encabezadoscmp.php</text>
+
+  <line class="edge" x1="181" y1="244" x2="181" y2="254" marker-end="url(#a5)"></line>
+  <line class="edge" x1="463" y1="244" x2="463" y2="254" marker-end="url(#a5)"></line>
+  <line class="edge" x1="745" y1="244" x2="745" y2="254" marker-end="url(#a5)"></line>
+  <line class="edge" x1="1023" y1="244" x2="1023" y2="254" marker-end="url(#a5)"></line>
+  <line class="edge" x1="1035" y1="118" x2="1035" y2="144" marker-end="url(#a5)"></line>
+
+  <rect class="nb" x="20" y="356" width="560" height="44" rx="4"></rect>
+  <text class="t-s" x="38" y="374">6 · Cierre del documento</text>
+  <text class="t-sm" x="38" y="391">insertarFUPID() · 150 / 251 / 1304 · insertarPDFID() · 259 · Mostrar/anexos_observaciones.php · oficio_capturo.php</text>
+
+  <rect class="nb-ext" x="620" y="356" width="560" height="44" rx="4"></rect>
+  <text class="t-s" x="638" y="374">7 · Salida</text>
+  <text class="t-sm" x="638" y="391">$pdf-&gt;Output('F', FUPs/…)  ·  renglón en Creados_*.txt con fecha, archivo, usuario e IP</text>
+
+  <line class="edge" x1="300" y1="326" x2="300" y2="350" marker-end="url(#a5)"></line>
+  <line class="edge" x1="900" y1="326" x2="900" y2="350" marker-end="url(#a5)"></line>
+
+  <rect class="nb" x="20" y="420" width="1160" height="40" rx="4"></rect>
+  <text class="t-s" x="38" y="436">Carpetas de salida según el flujo</text>
+  <text class="t-sm" x="38" y="452">FUPs/Masivo_Original/ (original y manual)  ·  Masivo_Original/CCT/ (cambio CT)  ·  Masivo_Original/Previo/ (vista previa)  ·  Masivo_ORIGINAL/ y Masivo_Copia/ (reimpresión)</text>
+</svg>
+</div>
+<figcaption>La reimpresión invierte el patrón: en lugar de recibir un JSON del navegador, lee el FUP ya guardado con las consultas 95 (antecedentes), 96 (plazas), 189 (complementos) y 186 (trabajador), y lo redibuja con los <span class="path">Mostrar/R_seccion*.php</span>.</figcaption>
+</figure>
+
+<h2 id="autorizacion">6 · Cadena de autorización y reimpresión</h2>
+<p class="sub">Un documento recorre tres visados antes de quedar firme. Cada escalón es una pantalla con su endpoint de autorizar y otro de rechazar.</p>
+
+<figure>
+<div class="scroller">
+<svg viewBox="0 0 1200 330" role="img" aria-label="Cadena de autorización: revisión de captura, autorización CGRH, autorización ADMIN, FUPs para autorizar y reimpresión, con los endpoints de autorizar y rechazar de cada escalón.">
+  <defs><marker id="a6" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="currentColor"></polygon></marker>
+  <marker id="a6w" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto"><polygon points="0,0 10,4 0,8" fill="#8d2f2f"></polygon></marker></defs>
+
+  <rect class="nb" x="20" y="40" width="216" height="92" rx="4"></rect>
+  <text class="t-b" x="36" y="62">Revisión captura</text>
+  <text class="t-s" x="36" y="79">Pendientes_Paty.php</text>
+  <text class="t-s" x="36" y="94">2 156 líneas</text>
+  <text class="t-s" x="36" y="110">cancelar_cgrh.php · 156 · 205</text>
+  <text class="t-s" x="36" y="124">editar_fup.php · crearPDF_rOriginal_</text>
+
+  <rect class="nb" x="266" y="40" width="216" height="92" rx="4"></rect>
+  <text class="t-b" x="282" y="62">Autorización CGRH</text>
+  <text class="t-s" x="282" y="79">Pendientes_Maestra_Guadalupe</text>
+  <text class="t-s" x="282" y="94">update_autorizar_2.php</text>
+  <text class="t-s" x="282" y="110">update_rechazar_cgrhCT.php</text>
+  <text class="t-s" x="282" y="124">203 · 205 · 245 · 1320</text>
+
+  <rect class="nb" x="512" y="40" width="216" height="92" rx="4"></rect>
+  <text class="t-b" x="528" y="62">Autorización ADMIN</text>
+  <text class="t-s" x="528" y="79">Pendientes_Directora.php</text>
+  <text class="t-s" x="528" y="94">update_autorizar_3.php</text>
+  <text class="t-s" x="528" y="110">update_rechazar_admin.php · 245 · 249</text>
+  <text class="t-s" x="528" y="124">Actualizar_cambios.php · 1311</text>
+
+  <rect class="nb" x="758" y="40" width="216" height="92" rx="4"></rect>
+  <text class="t-b" x="774" y="62">FUP's para autorizar</text>
+  <text class="t-s" x="774" y="79">Fups_Autorizados.php</text>
+  <text class="t-s" x="774" y="94">buscarFup_Crear1.php</text>
+  <text class="t-s" x="774" y="110">204 · 210 · 1278 · 1280 · 1291</text>
+  <text class="t-s" x="774" y="124">update_autorizar_4.php · 210</text>
+
+  <rect class="nb" x="1004" y="40" width="176" height="92" rx="4"></rect>
+  <text class="t-b" x="1020" y="62">Reimpresión</text>
+  <text class="t-s" x="1020" y="79">Reimpresion_Original.php</text>
+  <text class="t-s" x="1020" y="94">checar.php · 204</text>
+  <text class="t-s" x="1020" y="110">crearPDF_rOriginal.php</text>
+  <text class="t-s" x="1020" y="124">95 · 96 · 186 · 189 · 242</text>
+
+  <line class="edge" x1="236" y1="86" x2="260" y2="86" marker-end="url(#a6)"></line>
+  <line class="edge" x1="482" y1="86" x2="506" y2="86" marker-end="url(#a6)"></line>
+  <line class="edge" x1="728" y1="86" x2="752" y2="86" marker-end="url(#a6)"></line>
+  <line class="edge" x1="974" y1="86" x2="998" y2="86" marker-end="url(#a6)"></line>
+
+  <path class="edge-warn" d="M 620 132 L 620 166 L 128 166 L 128 136" marker-end="url(#a6w)"></path>
+  <text class="t-warn" x="374" y="161" text-anchor="middle">rechazo: el documento regresa a captura</text>
+
+  <rect class="nb" x="20" y="196" width="570" height="54" rx="4"></rect>
+  <text class="t-s" x="38" y="215">Consulta de PDF ya generado, desde cualquiera de las pantallas</text>
+  <text class="t-sm" x="38" y="232">buscar_PDF_local.php · buscar_PDF_local_CT.php · buscar_PDF_local_Previo.php · buscar_PDF_local_p.php</text>
+  <text class="t-s" x="38" y="246">hacen glob() sobre FUPs/ y devuelven la ruta del archivo que coincide con el num_docto</text>
+
+  <rect class="nb" x="610" y="196" width="570" height="54" rx="4"></rect>
+  <text class="t-s" x="628" y="215">Reporte y edición</text>
+  <text class="t-sm" x="628" y="232">Reporte_Autorizados.php → data_fups_reportes_autorizados.php · 256</text>
+  <text class="t-sm" x="628" y="248">editar_fup.php · 9 · 157 · 195 · 207 · 210 · 246 · 247 · 250 · 1274 — redibuja un FUP ya capturado</text>
+
+  <rect class="nb-warn" x="20" y="272" width="1160" height="48" rx="4"></rect>
+  <text class="t-warn" x="38" y="291">REFERENCIAS ROTAS</text>
+  <text class="t-sm" x="38" y="309">Pendientes_Maestra_Guadalupe.php y Pendientes_Directora.php piden 20 endpoints que no existen en pantallas/ — están solo en pantallas_cambio/ (ver la sección 12)</text>
+</svg>
+</div>
+<figcaption>Cada paso escribe bitácora por el mismo WebService: la consulta 195 aparece comentada en el código como «bitacora y autorizar».</figcaption>
+</figure>
+
+<h2 id="carpetas">7 · Carpetas del proyecto</h2>
+<div class="tscroll">
+<table>
+  <thead><tr><th>Carpeta</th><th>Archivos</th><th>Qué contiene</th></tr></thead>
+  <tbody>
+    <tr><td class="nw"><code>/</code> (raíz)</td><td class="num">11</td><td><code>index.php</code> (entrada), <code>inde.php</code> (copia anterior), <code>ValidarKey*.php</code>, <code>docs.php</code>, <code>buscar.php</code>, <code>info.php</code>, <code>web.config</code>.</td></tr>
+    <tr><td class="nw"><code>Conexion/</code></td><td class="num">10 + 8 subcarpetas</td><td>Clientes SOAP, conexión SQL Server, clase <code>Permisos</code>, y los endpoints de autocompletado y catálogos.</td></tr>
+    <tr><td class="nw"><code>pantallas/</code></td><td class="num">76</td><td>Las 10 pantallas activas, sus endpoints <code>data_*</code>, <code>update_*</code>, <code>buscar_PDF_local*</code> y varias copias con fecha en el nombre.</td></tr>
+    <tr><td class="nw"><code>pantallas_cambio/</code></td><td class="num">64</td><td>Módulo paralelo de bajas, licencias y guiones. <strong>Nada del código activo lo referencia por su ruta</strong>, pero dos pantallas activas piden archivos que solo viven aquí.</td></tr>
+    <tr><td class="nw"><code>Js/</code> · <code>Js_cambio/</code></td><td class="num">38 · 24</td><td>Validaciones, autocompletados, modales, envío de formularios y apertura de PDFs. También los endpoints PHP <code>recibir.php</code>, <code>recibir_ma.php</code>, <code>borrar.php</code>, <code>Auto_completar*.php</code>.</td></tr>
+    <tr><td class="nw"><code>Scripts/</code></td><td class="num">9</td><td>Los <code>script_Tabla*</code>: el JavaScript que arma el JSON de las tablas de selección y lo manda al generador. Uno por flujo.</td></tr>
+    <tr><td class="nw"><code>Pdf/</code></td><td class="num">11</td><td><code>Antecedentes*.php</code> (pantallas de selección), <code>MovimientosPrevio.php</code>, <code>tabla.php</code>, <code>tab.php</code>, <code>get_motivos.php</code>, <code>Opcion.php</code>, <code>process.php</code>.</td></tr>
+    <tr><td class="nw"><code>Pdf/crearPDF/</code></td><td class="num">38</td><td>Los generadores. <code>F_Insert/</code> (16 archivos de insert por sección) y <code>Mostrar/</code> (posiciones dentro del formato).</td></tr>
+    <tr><td class="nw"><code>Pdf/Reimprimir/</code></td><td class="num">~30</td><td>Reimpresión y copias: <code>crearPDF_rOriginal.php</code>, <code>Reimpresion.php</code>, <code>Reimpresion2.php</code>, más <code>Masivo/</code> y <code>Mostrar/</code>.</td></tr>
+    <tr><td class="nw"><code>Cascaron/</code></td><td class="num">6</td><td>La clase <code>PDF</code> que extiende FPDF con el cascarón del formato: <code>Cascaron.php</code>, <code>Cascaron_man.php</code>, <code>Cascaron_man2013.php</code>.</td></tr>
+    <tr><td class="nw"><code>fpdf181/</code> · <code>fpdi/</code> · <code>lib/</code> · <code>vendor/</code> · <code>PHPMailer/</code></td><td class="num">—</td><td>Librerías: FPDF, FPDI, nusoap y Composer. PHPMailer está presente pero no participa en los flujos revisados.</td></tr>
+    <tr><td class="nw"><code>FUPs/</code></td><td class="num">—</td><td>Salida de PDFs: <code>Masivo_Original/</code>, <code>Masivo_Original/CCT/</code>, <code>Masivo_Original/Previo/</code>, <code>Masivo_Copia/</code>.</td></tr>
+    <tr><td class="nw"><code>Codigo_Barras/</code> · <code>Logo/</code> · <code>Css/</code></td><td class="num">—</td><td>PNG de códigos de barras y <code>barcode.php</code>; logos, sellos, firmas y encabezados; hojas de estilo por pantalla.</td></tr>
+    <tr><td class="nw"><code>Errores/</code> · <code>NEscripts/</code> · <code>doc_exportados/</code> · <code>Archivos/</code> · <code>SQL/</code> · <code>nbproject/</code></td><td class="num">—</td><td>Copias históricas (<code>Errores/Pdf_copia/</code> duplica medio <code>Pdf/</code>), scripts suel­tos, exportaciones y el proyecto de NetBeans.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pantallas">8 · Pantallas activas y sus endpoints</h2>
+<div class="tscroll">
+<table>
+  <thead><tr><th>Pantalla</th><th>Líneas</th><th>Endpoints que llama</th><th>Consultas propias</th></tr></thead>
+  <tbody>
+    <tr><td class="nw"><code>FUP_CambioCT.php</code><span class="mod-tag">CORREGIDO</span></td><td class="num">1576</td><td><code>data_cambio_CT.php</code>, <code>../Pdf/AntecedentesPrevio.php</code>, <code>../Pdf/CrearPDF/CrearPrevio.php</code>, <code>buscar_PDF_local_Previo.php</code>, <code>update_autorizar_Paty_ct.php</code>, <code>cancelar_cgrh.php</code>, y vía <code>script_Tabla_CT_Previo.php</code> a <code>CreacionFUPOriginal_CT_Editar.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>FUP_CambioCT90.php</code></td><td class="num">1473</td><td><code>data_cambio_CT90.php</code>, <code>AntecedentesPrevio.php</code>, <code>CrearPrevio90.php</code>, <code>crearFUP_CambioCT90.php</code>, <code>Actualizar_cambios_ct_90.php</code>, <code>Borrar_doc.php</code>, <code>buscar_PDF_local_CT.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>FUP_CambioCT_Pendientes.php</code></td><td class="num">1421</td><td><code>data_cambio_CT_Pendientes.php</code>, <code>AntecedentesPrevio.php</code>, <code>CrearPrevio_Pendientes.php</code>, <code>CrearFUP_CambioCT_Pendientes.php</code>, <code>Actualizar_cambios_ct.php</code>, <code>crearPDF_rOriginal_.php</code>, <code>Borrar_doc.php</code>, <code>buscar_PDF_local.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Pendientes_Paty.php</code></td><td class="num">2156</td><td><code>data_Paty_Unico.php?cons=1…11</code>, <code>cancelar_cgrh.php</code>, <code>editar_fup.php</code>, <code>crearPDF_rOriginal_.php</code>, <code>buscar_PDF_local.php</code>, <code>buscar_PDF_local_CT.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Pendientes_Maestra_Guadalupe.php</code></td><td class="num">1476</td><td><code>data_mtra-guadalupe_Unico.php?cons=1…17</code>, <code>data_mtra.php</code>, <code>update_autorizar_2.php</code><span class="warn-tag">FALTA</span>, <code>update_rechazar_cgrhCT.php</code>, <code>editar_fup.php</code>, 8 <code>data_*</code> que faltan</td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Pendientes_Directora.php</code></td><td class="num">1369</td><td><code>data_Admin_Unico.php?cons=1…15</code>, <code>update_autorizar_3.php</code><span class="warn-tag">FALTA</span>, <code>update_rechazar_admin.php</code>, <code>Actualizar_cambios.php</code>, <code>editar_fup.php</code>, 9 <code>data_*</code> y <code>vacio.php</code> que faltan</td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Fups_Autorizados.php</code></td><td class="num">901</td><td><code>data_fups_autorizados.php?cons=1…3</code>, <code>buscarFup_Crear1.php</code>, <code>buscar_PDF_local.php</code>, <code>buscar_PDF_local_CT.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Fups_Autorizados_ID4.php</code></td><td class="num">365</td><td><code>data_fups_autorizados4_Paty.php</code>, <code>buscar_PDF_local.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Reimpresion_Original.php</code></td><td class="num">57</td><td>Solo monta el formulario e incluye <code>../Js/funciones_rOriginal10.js</code>, <code>funciones_rO1.js</code>, <code>typeahead.js</code>, <code>../Conexion/mostrar_boton/boton.php</code>, <code>../Js/Auto_completarR_Original.php</code></td><td class="num">—</td></tr>
+    <tr><td class="nw"><code>Reporte_Autorizados.php</code></td><td class="num">862</td><td><code>data_fups_reportes_autorizados.php?cons=1…11</code></td><td class="num">—</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Endpoints de datos y de acción</h3>
+<div class="tscroll">
+<table>
+  <thead><tr><th>Endpoint</th><th>Consultas</th><th>Qué devuelve o hace</th></tr></thead>
+  <tbody>
+    <tr><td class="nw"><code>data_cambio_CT.php</code></td><td class="num">1267</td><td>Grid de documentos de Cambio CT pendientes de FUP.</td></tr>
+    <tr><td class="nw"><code>data_cambio_CT90.php</code></td><td class="num">1296</td><td>Grid de Cambio CT 90.</td></tr>
+    <tr><td class="nw"><code>data_cambio_CT_Pendientes.php</code></td><td class="num">1288</td><td>Grid de Cambio CT Pendientes.</td></tr>
+    <tr><td class="nw"><code>data_Paty_Unico.php</code></td><td class="num">193 · 212 · 214 · 221 · 236 · 240 · 254 · 1265 · 1269 · 1312</td><td>Once vistas distintas para revisión de captura, según <code>?cons=</code>.</td></tr>
+    <tr><td class="nw"><code>data_mtra-guadalupe_Unico.php</code></td><td class="num">198 · 199 · 212 · 216 · 217 · 221 · 225 · 226 · 231 · 232 · 237 · 238 · 252 · 255 · 263 · 1270 · 1314 · 2322</td><td>Diecisiete vistas para la autorización CGRH.</td></tr>
+    <tr><td class="nw"><code>data_Admin_Unico.php</code></td><td class="num">200 · 201 · 212 · 218 · 219 · 221 · 227 · 228 · 234 · 235 · 239 · 240 · 253 · 262 · 1271 · 1306 · 1307 · 1314</td><td>Quince vistas para la autorización ADMIN.</td></tr>
+    <tr><td class="nw"><code>data_fups_autorizados.php</code></td><td class="num">209 · 1277 · 2323</td><td>FUP's listos para autorizar, en tres pestañas.</td></tr>
+    <tr><td class="nw"><code>data_fups_autorizados4_Paty.php</code></td><td class="num">243</td><td>Variante ID4 del listado anterior.</td></tr>
+    <tr><td class="nw"><code>data_fups_reportes_autorizados.php</code></td><td class="num">256</td><td>Reporte por rango de fechas, once cortes.</td></tr>
+    <tr><td class="nw"><code>data_mtra.php</code></td><td class="num">265</td><td>Consulta por relación para CGRH.</td></tr>
+    <tr><td class="nw"><code>update_autorizar_4.php</code> · <code>update_autorizar_41.php</code></td><td class="num">210 · 1274</td><td>Autoriza los documentos seleccionados.</td></tr>
+    <tr><td class="nw"><code>update_autorizar_Paty_ct.php</code></td><td class="num">—</td><td>Autoriza desde la pantalla de Cambio CT, con barra de progreso.</td></tr>
+    <tr><td class="nw"><code>update_rechazar_cgrh.php</code> · <code>update_rechazar_cgrhCT.php</code></td><td class="num">203 · 205 · 244 · 245 · 1320</td><td>Rechazo en el visado CGRH; el documento vuelve a captura.</td></tr>
+    <tr><td class="nw"><code>update_rechazar_admin.php</code></td><td class="num">245 · 249</td><td>Rechazo en el visado ADMIN.</td></tr>
+    <tr><td class="nw"><code>cancelar_cgrh.php</code></td><td class="num">156 · 205</td><td>Cancela la captura de un documento.</td></tr>
+    <tr><td class="nw"><code>Borrar_doc.php</code> · <code>Pdf/process.php</code> · <code>Js/borrar.php</code></td><td class="num">156</td><td>Borra la captura de un documento antes de volver a crearlo.</td></tr>
+    <tr><td class="nw"><code>buscar_PDF_local*.php</code> (4 variantes)</td><td class="num">—</td><td><code>glob()</code> sobre <code>FUPs/</code>; devuelven la ruta y la fecha del PDF que coincide con el num_docto. Escriben <code>Documento_Mostrado.txt</code>.</td></tr>
+    <tr><td class="nw"><code>buscarFup_Crear1.php</code></td><td class="num">9 · 204 · 210 · 1278 · 1280 · 1291</td><td>Arma el PDF de los FUP's por autorizar, en lote.</td></tr>
+    <tr><td class="nw"><code>editar_fup.php</code></td><td class="num">9 · 157 · 195 · 207 · 210 · 246 · 247 · 250 · 1274</td><td>Redibuja un FUP ya capturado para corregirlo. 932 líneas.</td></tr>
+    <tr><td class="nw"><code>checar.php</code></td><td class="num">204</td><td>Verifica si el num_docto existe antes de reimprimir.</td></tr>
+    <tr><td class="nw"><code>Consultar_id.php</code></td><td class="num">1305</td><td>Devuelve el id interno de un documento.</td></tr>
+    <tr><td class="nw"><code>Pdf/get_motivos.php</code></td><td class="num">1266 · 1316</td><td>Catálogo de motivos de movimiento.</td></tr>
+    <tr><td class="nw"><code>Pdf/MovimientosPrevio.php</code></td><td class="num">1297</td><td>Movimientos para la vista previa.</td></tr>
+    <tr><td class="nw"><code>Pdf/tabla.php</code> · <code>Pdf/tab.php</code></td><td class="num">140 · 151 · 153 · 170 · 1266 · 1276 · 1299 · 1317</td><td>Tablas auxiliares de captura.</td></tr>
+    <tr><td class="nw"><code>MASIVO.php</code> · <code>MASIVO_poner_logo.php</code> · <code>imprimir_masivo_Original.php</code></td><td class="num">9 · 1278 · 1298</td><td>Impresión en lote y sellado de logos sobre PDFs ya generados.</td></tr>
+    <tr><td class="nw"><code>Pdf/crearPDF/Foliacion_Lote.php</code></td><td class="num">—</td><td>Pide folios al servicio de foliación por lote; no usa <code>getConsulta</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="generadores">9 · Generadores de PDF</h2>
+<div class="tscroll">
+<table>
+  <thead><tr><th>Archivo</th><th>Líneas</th><th>Escribe en</th><th>Consultas</th></tr></thead>
+  <tbody>
+    <tr><td class="nw"><code>crearPDF/CreacionFUPOriginal.php</code></td><td class="num">2790</td><td><code>FUPs/Masivo_Original/</code></td><td class="num">64 · 66 · 129 · 136 · 137 · 155 · 171 · 185 · 251 · 259</td></tr>
+    <tr><td class="nw"><code>crearPDF/CreacionFUPOriginal_manual.php</code></td><td class="num">2596</td><td><code>Masivo_Original/</code>, <code>Masivo_Original/CCT/</code></td><td class="num">1 · 64 · 66 · 129 · 137 · 155 · 171 · 185 · 251 · 259</td></tr>
+    <tr><td class="nw"><code>crearPDF/CreacionFUPMasivo_Correccion.php</code></td><td class="num">2806</td><td><code>Masivo_Original/</code>, <code>CCT/</code></td><td class="num">1 · 64 · 66 · 129 · 137 · 155 · 171 · 185 · 251 · 259</td></tr>
+    <tr><td class="nw"><code>crearPDF/CrearFUP_CambioCT.php</code></td><td class="num">2619</td><td><code>Masivo_Original/CCT/</code></td><td class="num">9 · 64 · 129 · 136 · 137 · 155 · 171 · 251 · 259 · 1281</td></tr>
+    <tr><td class="nw"><code>crearPDF/CreacionFUPOriginal_CT_Editar.php</code><span class="mod-tag">CORREGIDO</span></td><td class="num">2016</td><td><code>Masivo_Original/CCT/</code></td><td class="num">9 · 64 · 129 · 136 · 137 · 155 · 185 · 251 · 259 · 2321 · 1303 · 1304</td></tr>
+    <tr><td class="nw"><code>crearPDF/CreacionFUPOriginal_CT_Editar90.php</code></td><td class="num">1574</td><td><code>Masivo_Original/CCT/</code></td><td class="num">9 · 64 · 129 · 137 · 251 · 259 · 1289 · 1292 · 1293</td></tr>
+    <tr><td class="nw"><code>crearPDF/CreacionFUPOriginal_CT_Editar_Pendientes.php</code></td><td class="num">1987</td><td><code>Masivo_Original/CCT/</code></td><td class="num">9 · 64 · 129 · 137 · 155 · 185 · 251 · 259 · 1289 · 1292 · 1293</td></tr>
+    <tr><td class="nw"><code>crearPDF/CrearPrevio.php</code></td><td class="num">1947</td><td><code>Masivo_Original/Previo/</code> · no inserta nada</td><td class="num">155 · 1281 · 1282 · 1283</td></tr>
+    <tr><td class="nw"><code>Reimprimir/crearPDF_rOriginal.php</code></td><td class="num">2110</td><td><code>FUPs/Masivo_ORIGINAL/</code></td><td class="num">9 · 95 · 96 · 186 · 189 · 204 · 205 · 207 · 242</td></tr>
+    <tr><td class="nw"><code>Reimprimir/crearPDF_rOriginal_.php</code></td><td class="num">2098</td><td><code>Masivo_ORIGINAL/Previo/</code></td><td class="num">9 · 95 · 186 · 189 · 205 · 207 · 242 · 1313</td></tr>
+    <tr><td class="nw"><code>Reimprimir/Reimpresion.php</code> · <code>Reimpresion2.php</code></td><td class="num">2898 · 2444</td><td><code>Masivo_Copia/</code></td><td class="num">9 · 64 · 95 · 96 · 186 · 189 · 204 · 205 · 207 · 242 · 261</td></tr>
+    <tr><td class="nw"><code>crearPDF/Actualizar_cambios*.php</code></td><td class="num">42 – 69</td><td>nada: solo marcan estado</td><td class="num">1308 · 1309 · 1311</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Archivos de <code>F_Insert/</code> y <code>Mostrar/</code></h3>
+<div class="tscroll">
+<table>
+  <thead><tr><th>Sección del FUP</th><th>Inserta</th><th>Consulta</th><th>Dibuja</th></tr></thead>
+  <tbody>
+    <tr><td>Antecedentes</td><td><code>FUPPRE.php</code> · <code>FUPPRECT.php</code></td><td class="num">149 · 1303</td><td><code>pdfant.php</code></td></tr>
+    <tr><td>Plazas y movimientos</td><td><code>FUPPLA.php</code></td><td class="num">138</td><td><code>pdfmov.php</code></td></tr>
+    <tr><td>Datos personales</td><td><code>FUPPER.php</code></td><td class="num">146</td><td><code>pdftra.php</code> · <code>pdftraCCT.php</code></td></tr>
+    <tr><td>Complementos</td><td><code>FUPCMP.php</code></td><td class="num">159</td><td><code>pdfcmp.php</code> · <code>encabezadoscmp.php</code></td></tr>
+    <tr><td>Cierre del documento</td><td><code>FUPID.php</code>, <code>FUPID4.php</code>, <code>FUPID_4.php</code>, <code>FUPID_4_manual.php</code>, <code>FUPID_CT.php</code>, <code>FUPID_CT90.php</code>, <code>FUPID_CT_Editar.php</code>, <code>FUPID_CT_Pendientes*.php</code>, <code>FUPID_CT_manual.php</code></td><td class="num">150 · 264 · 1294 · 1295 · 1300 · 1304</td><td><code>pdfID.php</code></td></tr>
+    <tr><td>Bitácora</td><td><code>Bitacora.php</code></td><td class="num">195</td><td>—</td></tr>
+    <tr><td>Firmas y anexos</td><td>—</td><td class="num">9</td><td><code>pdfautorizaciones.php</code>, <code>pdfautorizaciones_rOriginal.php</code>, <code>anexos_observaciones.php</code>, <code>oficio_capturo.php</code></td></tr>
+    <tr><td>Reimpresión</td><td>—</td><td class="num">95 · 96 · 186 · 189</td><td><code>R_seccionAntecedentes.php</code>, <code>R_seccionAntecedentes2.php</code>, <code>R_seccionPlazas.php</code>, <code>R_seccionPersonales.php</code>, <code>R_seccionCmp.php</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="autocompletados">10 · Autocompletados y catálogos</h2>
+<p class="sub">Todos reciben <code>$_POST['query']</code>, lo pasan a mayúsculas, piden una consulta al WebService y devuelven JSON. Hay tres juegos casi idénticos, uno por variante del flujo.</p>
+<div class="tscroll">
+<table>
+  <thead><tr><th>Carpeta</th><th>Archivos</th><th>Qué resuelve</th></tr></thead>
+  <tbody>
+    <tr><td class="nw"><code>Conexion/Datos/</code></td><td class="num">12</td><td>Catálogos del formulario: RFC, CURP, unidad, subunidad, código de pago, plaza, horas, puesto, número de oficio.</td></tr>
+    <tr><td class="nw"><code>Conexion/DatosR/</code></td><td class="num">12</td><td>Los mismos, para la variante R del flujo.</td></tr>
+    <tr><td class="nw"><code>Conexion/ObtenerNum_Docto/</code></td><td class="num">11</td><td>A partir de un dato, el número de documento: <code>RFC_NumD.php</code>, <code>CURP_NumD.php</code>, <code>Plaza_NumD.php</code>, <code>NumOficio_NumD.php</code>, <code>Estatus_NumD.php</code>, <code>Fecha_Captura_NumD.php</code>, <code>Fecha_Cancelacion_NumD.php</code>, <code>Relacion_NumD.php</code>, <code>RFC_Num_M.php</code> (1315).</td></tr>
+    <tr><td class="nw"><code>Conexion/ObtenerNum_DoctoR/</code> · <code>ObtenerNum_DoctorO/</code></td><td class="num">10 · 10</td><td>Las mismas consultas para las variantes R y rO (reimpresión original).</td></tr>
+    <tr><td class="nw"><code>Conexion/ObtenerNomEmp/</code> · <code>ObtenerNomEmpR/</code></td><td class="num">3 · 2</td><td>Nombre del empleado desde RFC o CURP, y <code>NumDocto_DatosFup.php</code>, que precarga el formulario completo.</td></tr>
+    <tr><td class="nw"><code>Conexion/mostrar_boton/</code></td><td class="num">4</td><td><code>boton.php</code> y <code>botonR.php</code>: habilitan botones según permisos.</td></tr>
+    <tr><td class="nw"><code>Js/Auto_completar*.php</code></td><td class="num">4</td><td>Autocompletado embebido en <code>index.php</code>: normal, manual, R y R Original.</td></tr>
+    <tr><td class="nw"><code>Conexion/CargarFicheros.php</code> · <code>subidas/</code></td><td class="num">2</td><td>Subida de archivos anexos.</td></tr>
+    <tr><td class="nw"><code>Conexion/ldocus.php</code> · <code>ldocus_ori.php</code></td><td class="num">2</td><td>Listado de documentos para los botones masivos de <code>index.php</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="ids">11 · IDs de consulta del WebService</h2>
+<p class="sub">El sistema no tiene capa de datos: cada endpoint manda un número de <code>Resultado</code> al WebService. Esta es la lista de los que están en uso, con el papel que se les ve en el código. Los IDs de cuatro cifras son los agregados en los últimos años; la serie 1265–1320 es casi toda de Cambio CT.</p>
+<div class="tscroll">
+<table>
+  <thead><tr><th>ID</th><th>Papel</th><th>Dónde se usa</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td>Catálogo de documentos (DOCS)</td><td>generadores manual y masivo</td></tr>
+    <tr><td class="num">9</td><td>Firmas del formato</td><td>49 archivos: todos los generadores y reimpresiones</td></tr>
+    <tr><td class="num">15 – 44</td><td>Autocompletados: CURP, puesto, código de pago, plaza, unidad, subunidad, horas, estatus, núm. documento, núm. oficio, fecha de cancelación</td><td><code>Conexion/Datos*</code>, <code>ObtenerNum_Docto*</code></td></tr>
+    <tr><td class="num">59 · 61 · 62 · 64</td><td>Fechas: conversión año-mes-día y fecha del FUP</td><td>42 archivos</td></tr>
+    <tr><td class="num">65 · 66</td><td>Validación del documento al capturar</td><td><code>Js/recibir.php</code>, <code>recibir_ma.php</code>, generadores</td></tr>
+    <tr><td class="num">68 · 72 – 85</td><td>Más autocompletados (relación, RFC, captura, estatus, plaza)</td><td><code>Conexion/Datos*</code></td></tr>
+    <tr><td class="num">95</td><td><strong>Lee antecedentes guardados</strong> (FUPPre) y sus importes</td><td>24 archivos de reimpresión</td></tr>
+    <tr><td class="num">96</td><td>Lee plazas guardadas (FUPPla)</td><td>reimpresiones</td></tr>
+    <tr><td class="num">125 · 189</td><td>Lee complementos guardados (CMP)</td><td>reimpresiones</td></tr>
+    <tr><td class="num">129 · 163 · 186</td><td>Datos del trabajador</td><td>todos los generadores</td></tr>
+    <tr><td class="num">136</td><td>Anexos y observaciones del documento (DOCS)</td><td>16 archivos</td></tr>
+    <tr><td class="num">137 · 161 · 187 · 188</td><td>Movimientos del documento</td><td>todos los generadores</td></tr>
+    <tr><td class="num">138 · 146 · 149 · 159 · 150</td><td><strong>Inserts</strong>: plazas, personales, antecedentes, complementos, cabecera</td><td><code>F_Insert/</code></td></tr>
+    <tr><td class="num">140 · 151 · 153 · 170</td><td>Tablas auxiliares de captura</td><td><code>Pdf/tabla.php</code>, <code>Pdf/tab.php</code></td></tr>
+    <tr><td class="num">155</td><td>Concepto e importe del antecedente</td><td>24 archivos (hoy comentado en varios)</td></tr>
+    <tr><td class="num">156</td><td><strong>Borra</strong> la captura de un documento</td><td><code>Borrar_doc.php</code>, <code>cancelar_cgrh.php</code>, <code>Js/borrar.php</code>, <code>Pdf/process.php</code></td></tr>
+    <tr><td class="num">157 · 191</td><td>Antecedentes para la pantalla de captura</td><td><code>Pdf/Antecedentes.php</code>, <code>Antecedentes_manual.php</code></td></tr>
+    <tr><td class="num">171</td><td>Complementos al generar</td><td>17 archivos</td></tr>
+    <tr><td class="num">185</td><td>«Parte 2» del formato (conceptos DR, BS, I4, E3)</td><td>18 archivos; comentado en el generador de CCT</td></tr>
+    <tr><td class="num">193 – 201</td><td>Listados por perfil: docentes, administrativos, con y sin ordenamiento</td><td><code>data_Paty_Unico</code>, <code>data_mtra-guadalupe_Unico</code>, <code>data_Admin_Unico</code></td></tr>
+    <tr><td class="num">195</td><td><strong>Bitácora y autorizar</strong></td><td>9 archivos, entre ellos <code>FUPID_CT_Editar.php</code></td></tr>
+    <tr><td class="num">203 · 205 · 244 · 245 · 249 · 1320</td><td>Rechazos y regreso a captura</td><td><code>update_rechazar_*</code></td></tr>
+    <tr><td class="num">204 · 206 · 207</td><td>Existencia del documento antes de imprimir</td><td><code>checar.php</code>, <code>recibir.php</code>, reimpresiones</td></tr>
+    <tr><td class="num">209 · 243 · 1277 · 2323</td><td>FUP's autorizados y por autorizar</td><td><code>data_fups_autorizados*</code></td></tr>
+    <tr><td class="num">210 · 1274</td><td><strong>Autoriza</strong> el documento</td><td><code>update_autorizar_4.php</code>, <code>_41.php</code>, <code>editar_fup.php</code></td></tr>
+    <tr><td class="num">211 – 240</td><td>Bajas, licencias y guiones por perfil</td><td><code>data_Bajas_*</code>, <code>data_Licencias_*</code>, <code>data_Guiones_*</code></td></tr>
+    <tr><td class="num">242</td><td>Quién imprimió el documento</td><td>reimpresiones</td></tr>
+    <tr><td class="num">246 · 247 · 250</td><td>Datos para reeditar un FUP</td><td><code>editar_fup.php</code></td></tr>
+    <tr><td class="num">251</td><td>Cabecera del FUP · <em>producción</em></td><td>19 archivos (el 150 es la versión anterior)</td></tr>
+    <tr><td class="num">252 – 256 · 262 · 263 · 265</td><td>Cortes «TODOS», «RELACIÓN», «CMP», «GUIONES» de cada pantalla de autorización</td><td><code>data_*_Unico.php</code>, <code>data_mtra.php</code></td></tr>
+    <tr><td class="num">259 · 260</td><td><strong>Guarda el id del PDF</strong> · <em>desarrollo</em>; el 251 es el de producción</td><td>17 archivos</td></tr>
+    <tr><td class="num">261</td><td>Reimpresión como copia</td><td><code>Reimpresion.php</code>, <code>Reimpresion2.php</code></td></tr>
+    <tr><td class="num">264 · 1294 · 1295 · 1300 · 1304</td><td>Variantes del insert de cabecera por flujo</td><td><code>F_Insert/FUPID*</code></td></tr>
+    <tr><td class="num">1265 · 1269 · 1270 · 1271 · 1306 · 1307 · 1312 · 1314 · 2322</td><td>Cortes de Cambio CT dentro de las pantallas de autorización</td><td><code>data_*_Unico.php</code></td></tr>
+    <tr><td class="num">1266 · 1316</td><td>Catálogo de motivos de movimiento</td><td><code>Pdf/get_motivos.php</code>, <code>Pdf/tabla.php</code></td></tr>
+    <tr><td class="num">1267 · 1288 · 1296</td><td>Grids de Cambio CT, CCT Pendientes y CCT 90</td><td><code>data_cambio_CT*.php</code></td></tr>
+    <tr><td class="num">1268 · 1275 · 1279</td><td>Cabecera de CCT Pendientes y CCT manual · <em>producción</em></td><td><code>CrearFUP_CambioCT_Pendientes.php</code>, <code>_manual.php</code></td></tr>
+    <tr><td class="num">1273 · 1276 · 1299 · 1317</td><td>Consultas auxiliares de captura</td><td><code>pantallas/4.php</code>, <code>Pdf/tabla.php</code></td></tr>
+    <tr><td class="num">1278 · 1280 · 1291</td><td>Lote de FUP's por autorizar e impresión masiva</td><td><code>buscarFup_Crear1.php</code>, <code>MASIVO*.php</code></td></tr>
+    <tr><td class="num">1281</td><td><strong>Antecedentes actuales</strong> de Cambio CT · <em>producción</em></td><td><code>AntecedentesPrevio.php</code>, <code>CrearPrevio.php</code>, <code>CrearFUP_CambioCT.php</code></td></tr>
+    <tr><td class="num">1282 · 1283</td><td>Movimientos y trabajador de la vista previa</td><td><code>CrearPrevio.php</code></td></tr>
+    <tr><td class="num">1284 – 1287</td><td>Los otros filtros de antecedentes: Todos, Todos sin núm. documento, Histórico, Por documento</td><td><code>AntecedentesPrevio.php</code></td></tr>
+    <tr><td class="num">1289 · 1292 · 1293</td><td>Secciones de CCT 90 y CCT Pendientes · <em>desarrollo</em></td><td><code>CreacionFUPOriginal_CT_Editar90.php</code>, <code>_Pendientes.php</code></td></tr>
+    <tr><td class="num">1297</td><td>Movimientos de la vista previa</td><td><code>Pdf/MovimientosPrevio.php</code></td></tr>
+    <tr><td class="num">1298</td><td>Sellado de logo sobre PDF</td><td><code>MASIVO_poner_logo.php</code></td></tr>
+    <tr><td class="num">1303</td><td><strong>Inserta el antecedente de Cambio CT</strong></td><td><code>F_Insert/FUPPRECT.php</code></td></tr>
+    <tr><td class="num">1305</td><td>id interno de un documento</td><td><code>Consultar_id.php</code></td></tr>
+    <tr><td class="num">1308 · 1309 · 1311</td><td>Marca el cambio como aplicado</td><td><code>Actualizar_cambios*.php</code></td></tr>
+    <tr><td class="num">1313 · 1315</td><td>Plazas en reimpresión previa · RFC a núm. documento manual</td><td><code>crearPDF_rOriginal_.php</code>, <code>RFC_Num_M.php</code></td></tr>
+    <tr><td class="num">2321</td><td><strong>Borra el FUP completo por num_docto</strong>, lo que hace que «Editar» reemplace</td><td><code>CreacionFUPOriginal_CT_Editar.php</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="hallazgos">12 · Hallazgos y cosas que arrastra el proyecto</h2>
+<div class="cards">
+  <div class="card w">
+    <h4>Referencias rotas en las dos pantallas de autorización</h4>
+    <ul>
+      <li><code>Pendientes_Maestra_Guadalupe.php</code> pide 9 archivos que no están en <code>pantallas/</code>: <code>update_autorizar_2.php</code> y los <code>data_Bajas_CGRH_*</code>, <code>data_Guiones_CGRH_*</code>, <code>data_Licencias_CGRH_*</code>, <code>data_NO_mtra-guadalupe_*</code>, <code>data_O_mtra-guadalupe_*</code>.</li>
+      <li><code>Pendientes_Directora.php</code> pide 11: <code>update_autorizar_3.php</code>, <code>vacio.php</code> y los <code>data_Bajas_Admin_*</code>, <code>data_Guiones_Admin_*</code>, <code>data_Licencias_Admin_*</code>, <code>data_NO_Admin_*</code>, <code>data_O_Admin_*</code>.</li>
+      <li>Los 20 existen en <code>pantallas_cambio/</code>. Como las rutas son relativas, esas pestañas devuelven 404. Son las de bajas, licencias y guiones; las de FUP y Cambio CT sí funcionan.</li>
+    </ul>
+  </div>
+  <div class="card w">
+    <h4>Sesión sin validar</h4>
+    <ul>
+      <li><code>index.php</code> incluye <code>ValidarKey3.php</code>, que no consulta el servicio: fija <code>$usuario = "Jonathan"</code> y <code>$app = "1164"</code>.</li>
+      <li>Con eso, el menú se arma con los permisos de ese usuario y cualquiera que abra la URL entra como él.</li>
+      <li><code>ValidarKey.php</code> es el que sí valida contra <code>ValidoKey</code>; <code>ValidarKey1.php</code> lo usan solo <code>Pdf/Antecedentes.php</code> y <code>Pdf/Opcion.php</code>.</li>
+    </ul>
+  </div>
+  <div class="card w">
+    <h4>Ambiente mezclado</h4>
+    <ul>
+      <li><code>Conexion/wsdl.php</code> apunta hoy a <strong>producción</strong> (<code>WebService_FUP</code>), con la URL de pruebas comentada. Lo mismo <code>wsdl_foliacion.php</code>. El <code>DOCUMENTACION_PROYECTO.md</code> dice lo contrario, así que ese archivo quedó desactualizado.</li>
+      <li>Dentro del código hay IDs marcados <code>//desarrollo</code> y <code>//produccion</code> alternándose: el 259 está rotulado desarrollo y el 251 producción, y conviven en el mismo flujo.</li>
+      <li><code>Conexion/conexion.php</code> lleva usuario y contraseña de SQL Server en texto plano.</li>
+    </ul>
+  </div>
+  <div class="card w">
+    <h4>Duplicación</h4>
+    <ul>
+      <li><code>pantallas_cambio/</code> (64 archivos) y <code>Errores/Pdf_copia/</code> duplican módulos completos. <code>inde.php</code> es una copia de <code>index.php</code>.</li>
+      <li>Conviven copias con fecha en el nombre: <code>Pendientes_Paty - copia.php</code>, <code>Fups_Autorizados_05_10_2023.php</code>, <code>Pendientes_Maestra_Guadalupe_24_10_2022.php</code>.</li>
+      <li>Los nueve generadores grandes son variaciones del mismo archivo de ~2 500 líneas; un arreglo en uno no llega a los otros. Es exactamente lo que pasó con el tope <code>*13</code>.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Mayúsculas en las rutas</h4>
+    <ul>
+      <li>El código llama indistintamente a <code>Pdf/crearPDF/</code> y <code>Pdf/CrearPDF/</code>, y escribe en <code>FUPs/Masivo_Original/</code> y <code>FUPs/Masivo_ORIGINAL/</code>.</li>
+      <li>En Windows da igual; el día que esto se mueva a un servidor Linux, la mitad de los includes dejará de resolver.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Lo que falta documentar del WebService</h4>
+    <ul>
+      <li>Los IDs de <code>Resultado</code> son el contrato real del sistema y no están en ningún lado más que en el código. La sección 11 es la lista de los que están en uso.</li>
+      <li>El CT y el nivel de sueldo del antecedente no tienen campo propio en el insert 1303: si se necesitan en la base, hay que agregarlos a esa consulta del lado del WebService.</li>
+    </ul>
+  </div>
+</div>
+
+</div>

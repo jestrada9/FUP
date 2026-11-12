@@ -1,0 +1,104 @@
+/* =====================================================================
+   ORDEN DE INSTALACIÓN  (importante: en este orden)
+   =====================================================================
+
+   1. BASE DE DATOS
+      NADA QUE HACER. No se crea ningún objeto nuevo: el T-SQL del lote
+      viaja embebido en el web service (BDSQL.cs, método SqlDelLote) y
+      usa variables de tabla, que no requieren permisos de DDL.
+      Sólo se necesitan los permisos que el servicio ya tiene sobre
+      rel_doctos, numdocto, ctrlqnaproc y bit_captura.
+
+      (SQL/AsignacionFolioLote.sql queda para cuando haya permisos de
+       DDL; es opcional y rinde un poco mejor.)
+
+   2. WEB SERVICE
+      Publicar WebServiceFUP_Foliacion con los App_Code corregidos.
+      Verificar en el .asmx que aparecen los tres métodos:
+          getFolio  getFolioDetalle  getFolioLote
+
+   3. PHP
+      Foliacion_Lote.php ya apunta a getFolioLote.
+      OJO: el WSDL se cachea. wsdl_foliacion.php ya trae
+      soap.wsdl_cache_enabled = 0, pero si el método nuevo no aparece,
+      borrar los archivos wsdl* de la carpeta temporal de PHP.
+   ===================================================================== */
+
+
+/* =====================================================================
+   PRUEBA DESDE EL FRONT (jQuery, igual al resto del sistema)
+   ===================================================================== */
+
+var documentos = [
+    { area: "2310", num_docto: "1812004721", num_oficio: "1231004721" },
+    { area: "2313", num_docto: "2418318864", num_oficio: "1231300412" }
+];
+
+$.ajax({
+    url:  "../Pdf/crearPDF/Foliacion_Lote.php",
+    type: "POST",
+    dataType: "json",
+    data: {
+        documentos: window.btoa(JSON.stringify(documentos)),
+        usu: usuario
+    },
+    success: function (r) {
+
+        console.log("Total:", r.total,
+                    "Foliados:", r.foliados,
+                    "Omitidos:", r.omitidos,
+                    "Errores:", r.errores,
+                    "Mensaje:", r.mensaje);
+
+        var txt = "";
+        $.each(r.detalle, function (i, d) {
+            txt += d.num_docto + "  ->  " +
+                   (d.folio || "(sin folio)") +
+                   "  [" + d.estado + "] " + d.mensaje + "\n";
+        });
+        $('#nd_aut').val(txt);
+
+        // Sólo estos pasan a generar PDF
+        var ok = $.grep(r.detalle, function (d) {
+            return d.estado === "FOLIADO" || d.estado === "YA_FOLIADO";
+        });
+        console.log("Listos para PDF:", ok);
+    },
+    error: function (xhr) {
+        console.log("Falló la petición:", xhr.status, xhr.responseText);
+    }
+});
+
+
+/* =====================================================================
+   PRUEBA SIN FRONT
+   =====================================================================
+
+   a) Sólo el web service: abrir
+      https://appcgia.seslp.gob.mx/WebService_FUP_Foliacion/WebService.asmx
+      -> getFolioLote -> Invocar, pegando en Argumento:
+
+      {"usuario":"JEAD3","documentos":[{"area":"2310","num_docto":"1812004721","num_oficio":"1231004721"}]}
+
+   b) El PHP: POST a
+      http://localhost/Formato_Unico_Personal/Pdf/crearPDF/Foliacion_Lote.php
+      con  usu  y  documentos (el JSON en base64).
+      Para el base64, en la consola del navegador:
+          window.btoa(JSON.stringify(documentos))
+   ===================================================================== */
+
+
+/* =====================================================================
+   QUÉ ESPERAR
+   =====================================================================
+   FOLIADO     el documento terminaba en 000001 y recibió folio nuevo.
+   YA_FOLIADO  no terminaba en 000001; conserva su número, no se tocó.
+   ERROR       no existe en rel_doctos, hay más de una fila con esa
+               clave, o falló la transacción.
+
+   Los folios de un mismo lote salen CONSECUTIVOS, en el orden en que
+   mandaste los documentos.
+
+   Si un documento falla dentro de la transacción, se revierte el LOTE
+   COMPLETO y todos regresan como ERROR: no quedan folios a medias.
+   ===================================================================== */
