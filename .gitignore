@@ -13,7 +13,8 @@
 # --- Datos generados por el sistema (no son codigo fuente; pesan >10 GB) ----
 /FUPs/
 /doc_exportados/
-/Conexion/subidas/
+/Conexion/subidas/*
+!/Conexion/subidas/web.config
 /pantallas/PDF/
 /pantallas/ori/
 /pantallas/*.txt
